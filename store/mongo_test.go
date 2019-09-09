@@ -25,6 +25,7 @@ func TestMongoStore(t *testing.T) {
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	client := createMongoClient(ctx, t)
 	store := NewMongoStore(ctx, client)
+
 	t.Run("Inserindo linhas no banco", func(t *testing.T) {
 		err := store.SaveLinhas(linhas)
 		if err != nil {

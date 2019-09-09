@@ -61,3 +61,8 @@ func (ms *MongoStore) SaveLinhas(linhas model.Linhas) (err error) {
 
 	return
 }
+
+// Disconnect desconecta a store do banco
+func (ms *MongoStore) Disconnect() {
+	ms.client.Disconnect(ms.ctx)
+}
