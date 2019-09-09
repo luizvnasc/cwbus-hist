@@ -15,7 +15,7 @@ var linhas = model.Linhas{
 	model.Linha{
 		Codigo:           464,
 		Nome:             "A. MUNHOZ / J. BOTÂNICO",
-		SomenteCartao:    true,
+		SomenteCartao:    "S",
 		CategoriaServico: "CONVENCIONAL",
 		Cor:              "AMARELA",
 	},

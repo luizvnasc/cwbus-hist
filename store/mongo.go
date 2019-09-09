@@ -29,11 +29,13 @@ func NewMongoStore(ctx context.Context, client *mongo.Client) (store *MongoStore
 func (ms *MongoStore) SaveLinhas(linhas model.Linhas) (err error) {
 	var operations []mongo.WriteModel
 	coll := ms.db.Collection("linhas")
+
 	for _, linha := range linhas {
 		filtro := bson.M{"cod": linha.Codigo}
 
 		var l model.Linha
 		err = coll.FindOne(ms.ctx, filtro).Decode(&l)
+
 		switch {
 		case err == nil:
 			log.Printf("linha %d encontrada. Atualizando data de atualização.", l.Codigo)

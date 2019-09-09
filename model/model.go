@@ -26,7 +26,7 @@ type Linha struct {
 	//ID               primitive.ObjectID `json:"_id" bson:"_id"`
 	Codigo           int    `json:"cod" bson:"cod"`
 	Nome             string `json:"nome" bson:"nome"`
-	SomenteCartao    bool   `json:"somente_cartao" bson:"somente_cartao"`
+	SomenteCartao    string   `json:"somente_cartao" bson:"somente_cartao"`
 	CategoriaServico string `json:"categoria_servico" bson:"categoria_servico"`
 	Cor              string `json:"cor" bson:"cor"`
 	CriadoEm 		 int64  `json:"criado_em" bson:"criado_em"`
