@@ -3,31 +3,33 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 
-	"github.com/luizvnasc/cwbus.io/store"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"github.com/jasonlvhit/gocron"
 )
 
 func main() {
-	ctx := context.Background()
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(os.Getenv("CWBUS_DB_URL")))
-	if err != nil {
-		log.Fatalf("Erro ao conectar no banco: %q", err)
-		os.Exit(1)
-	}
+	// ctx := context.Background()
+	// client, err := mongo.Connect(ctx, options.Client().ApplyURI(os.Getenv("CWBUS_DB_URL")))
+	// if err != nil {
+	// 	log.Fatalf("Erro ao conectar no banco: %q", err)
+	// 	os.Exit(1)
+	// }
 
-	store := store.NewMongoStore(ctx, client)
+	//store := store.NewMongoStore(ctx, client)
 
+	go func() {
+		log.Println("Iniciando gocron...")
+		gocron.Every(1).Minute().Do(wakeUp)
+		<-gocron.Start()
+	}()
+	log.Println("Iniciando servidor...")
 	http.HandleFunc("/versao", Versao)
 	log.Fatalf("%q\n", http.ListenAndServe(Addr(), nil))
-
-	store.Disconnect()
+	//store.Disconnect()
 }
 
 // Versao é handler de chamada http para o caminho /versao.
@@ -43,6 +45,19 @@ func Addr() string {
 	return ":" + os.Getenv("PORT")
 }
 
-func wakeUp(url string, sleepTime int64) {
+func wakeUp() {
+	url := os.Getenv("CWBUS_VERSAO_URL")
+	if len(url) == 0 {
+		url = "http://localhost:8081/versao"
+	}
+	res, err := http.Get(url)
+	if err != nil {
+		log.Fatalf("Erro ao acodar o dinossáuro: %q\n", err)
+	}
+	if res.StatusCode == 200 {
+		log.Println("Trabalho... Trabalho...")
+	} else {
+		log.Fatalf("Status retornado diferente do esperado: %d", res.StatusCode)
+	}
 
 }
