@@ -1,4 +1,4 @@
-// Pacote com o tipo consumer que será quem irá consumir os serviços da urbs
+// Package consumer contém o tipo consumer que será quem irá consumir os serviços da urbs
 package consumer
 
 import (

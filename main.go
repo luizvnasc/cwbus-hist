@@ -9,9 +9,9 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/luizvnasc/cwbus.io/store"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"github.com/luizvnasc/cwbus.io/store"
 )
 
 func main() {
@@ -24,15 +24,15 @@ func main() {
 
 	store := store.NewMongoStore(ctx, client)
 
-	http.HandleFunc("/versao",Versao)
-	log.Fatalf("%q\n", http.ListenAndServe(Addr(),nil))
+	http.HandleFunc("/versao", Versao)
+	log.Fatalf("%q\n", http.ListenAndServe(Addr(), nil))
 
 	store.Disconnect()
 }
 
 // Versao é handler de chamada http para o caminho /versao.
-func Versao(w http.ResponseWriter, r *http.Request ){
-	fmt.Fprintf(w,"0.0.1")
+func Versao(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "0.0.1")
 }
 
 // Addr cria o endereço onde a aplicação estará rodando.
@@ -43,6 +43,6 @@ func Addr() string {
 	return ":" + os.Getenv("$PORT")
 }
 
-func wakeUp(url string, sleepTime int64){
+func wakeUp(url string, sleepTime int64) {
 
 }
