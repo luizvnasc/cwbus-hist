@@ -37,10 +37,10 @@ func Versao(w http.ResponseWriter, r *http.Request) {
 
 // Addr cria o endereço onde a aplicação estará rodando.
 func Addr() string {
-	if len(os.Getenv("$PORT")) == 0 {
+	if len(os.Getenv("PORT")) == 0 {
 		return ":8081"
 	}
-	return ":" + os.Getenv("$PORT")
+	return ":" + os.Getenv("PORT")
 }
 
 func wakeUp(url string, sleepTime int64) {
