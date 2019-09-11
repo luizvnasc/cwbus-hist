@@ -28,6 +28,9 @@ func (s *CwbusServer) Run() {
 
 // Shutdown desliga o servidor
 func (s *CwbusServer) Shutdown() {
+	// Limpa os handlers registrados antes de desligar o servidor
+	http.DefaultServeMux = http.NewServeMux()
+
 	if err := s.server.Shutdown(context.TODO()); err != nil {
 		panic(err)
 	}
