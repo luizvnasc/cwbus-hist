@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"log"
 	"net"
 	"testing"
 	"time"
@@ -21,12 +22,14 @@ func TestServer(t *testing.T) {
 			for {
 				select {
 				case <-quit:
+					log.Println("Finalizando servidor")
 					return
 				}
 			}
 		}()
-		timeout := time.Duration(5 * time.Second)
-		_, err := net.DialTimeout("tcp", "localhost:"+port, timeout)
+		// Espera o servidor subir
+		time.Sleep(30 * time.Millisecond)
+		_, err := net.Dial("tcp", ":"+port)
 		if err != nil {
 			t.Errorf("Site unreachable, error: %q", err)
 		}
@@ -43,13 +46,14 @@ func TestServer(t *testing.T) {
 			for {
 				select {
 				case <-quit:
+					log.Println("Finalizando servidor")
 					return
 				}
 			}
 		}()
-
-		timeout := time.Duration(5 * time.Second)
-		_, err := net.DialTimeout("tcp", "localhost:"+port, timeout)
+		// Espera o servidor subir
+		time.Sleep(30 * time.Millisecond)
+		_, err := net.Dial("tcp", ":"+port)
 		if err != nil {
 			t.Errorf("Site unreachable, error: %q", err)
 		}
