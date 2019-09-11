@@ -2,8 +2,11 @@ package server
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"net"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 	"time"
 )
@@ -61,27 +64,27 @@ func TestServer(t *testing.T) {
 
 	})
 
-	// testCases := []struct {
-	// 	path   string
-	// 	method string
-	// 	body   io.Reader
-	// 	want   string
-	// }{
-	// 	{"/versao", http.MethodGet, nil, "0.0.1"},
-	// }
+	testCases := []struct {
+		path   string
+		method string
+		body   io.Reader
+		want   string
+	}{
+		{"/versao", http.MethodGet, nil, "0.0.1"},
+	}
+	server := New("")
+	for _, tc := range testCases {
+		t.Run(fmt.Sprintf("testando rota %q", tc.path), func(t *testing.T) {
+			req, _ := http.NewRequest(tc.method, tc.path, tc.body)
+			res := httptest.NewRecorder()
 
-	// for _, tc := range testCases {
-	// 	t.Run(fmt.Sprintf("testando rota %q", tc.path), func(t *testing.T) {
-	// 		req, _ := http.NewRequest(tc.method, tc.path, tc.body)
-	// 		res := httptest.NewRecorder()
+			http.HandlerFunc(server.routes[tc.path].Handler()).ServeHTTP(res, req)
 
-	// 		http.HandlerFunc(server.routes[tc.path].Handler()).ServeHTTP(res, req)
-
-	// 		got := res.Body.String()
-	// 		if got != tc.want {
-	// 			t.Errorf("Erro ao testar rota %q. Resposta esperada: %q, obtida: %q", tc.path, tc.want, got)
-	// 		}
-	// 	})
-	// }
+			got := res.Body.String()
+			if got != tc.want {
+				t.Errorf("Erro ao testar rota %q. Resposta esperada: %q, obtida: %q", tc.path, tc.want, got)
+			}
+		})
+	}
 
 }
