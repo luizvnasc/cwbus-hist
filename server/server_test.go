@@ -18,6 +18,7 @@ func TestServer(t *testing.T) {
 		server := New("")
 		defer server.Shutdown()
 		quit := make(chan bool)
+		defer close(quit)
 		go func() {
 			go server.Run()
 			for {
@@ -33,18 +34,30 @@ func TestServer(t *testing.T) {
 			t.Errorf("Site unreachable, error: %q", err)
 		}
 		quit <- true
-		close(quit)
 	})
 
 	server := New(port)
+	defer server.Shutdown()
 	t.Run(fmt.Sprintf("Inciando servidor na porta %q", port), func(t *testing.T) {
-		go server.Run()
-		defer server.Shutdown()
+		quit := make(chan bool)
+		defer close(quit)
+		go func() {
+			go server.Run()
+			for {
+				select {
+				case <-quit:
+					return
+				}
+			}
+		}()
+
 		timeout := time.Duration(1 * time.Second)
 		_, err := net.DialTimeout("tcp", "localhost:"+port, timeout)
 		if err != nil {
 			t.Errorf("Site unreachable, error: %q", err)
 		}
+		quit <- true
+
 	})
 
 	testCases := []struct {
