@@ -12,16 +12,12 @@ import (
 // CwbusServer é o servidor da aplicação web
 type CwbusServer struct {
 	addr   string
-	routes map[string]*router.Route
+	routes []*router.Route
 	server *http.Server
 }
 
 // Run inicia o servidor
 func (s *CwbusServer) Run() {
-	s.server = &http.Server{Addr: s.addr}
-	for _, route := range s.routes {
-		http.HandleFunc(route.Path(), route.Handler())
-	}
 
 	s.server.ListenAndServe()
 }
@@ -41,5 +37,10 @@ func New(port string) *CwbusServer {
 	if len(port) == 0 {
 		port = "8081"
 	}
-	return &CwbusServer{addr: fmt.Sprintf(":%s", port), routes: router.Routes()}
+	server := &http.Server{Addr: ":" + port}
+	for _, route := range router.Routes() {
+		http.HandleFunc(route.Path(), route.Handler())
+	}
+
+	return &CwbusServer{addr: fmt.Sprintf(":%s", port), server: server, routes: router.Routes()}
 }

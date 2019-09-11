@@ -34,8 +34,9 @@ func NewRoute(path string, methods []string, handler HandlerFunc) *Route {
 }
 
 // Routes é um mapa das rotas do sistema.
-func Routes() map[string]*Route {
-	return map[string]*Route{
-	"/versao": NewRoute("/versao",[]string{http.MethodGet}, versao),
+func Routes() []*Route {
+	return []*Route{
+		NewRoute("/versao", []string{http.MethodGet}, versao),
+		NewRoute("/", []string{http.MethodGet}, notFound),
 	}
 }
