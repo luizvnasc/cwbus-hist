@@ -1,11 +1,11 @@
-// cwbus.io é uma aplicação que monitora os serviços de dados abertos da URBS sobre o transporte
+// cwbus-hist é uma aplicação que monitora os serviços de dados abertos da URBS sobre o transporte
 // público de Curitiba e armazena um histórico em uma base pública.
 package main
 
 import (
 	"os"
 
-	"github.com/luizvnasc/cwbus.io/server"
+	"github.com/luizvnasc/cwbus-hist/server"
 )
 
 func main() {

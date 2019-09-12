@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/luizvnasc/cwbus.io/server/router"
+	"github.com/luizvnasc/cwbus-hist/server/router"
 )
 
 // CwbusServer é o servidor da aplicação web

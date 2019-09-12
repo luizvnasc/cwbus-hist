@@ -11,4 +11,4 @@ script:
     - go test ./... -v -covermode=count -coverprofile=coverage.out
     - $GOPATH/bin/goveralls -coverprofile=coverage.out -service=travis-ci
 after_script:
-    - curl -d "repo=github.com/luizvnasc/cwbus.io" https://goreportcard.com/checks
+    - curl -d "repo=github.com/luizvnasc/cwbus-hist" https://goreportcard.com/checks

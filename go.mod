@@ -1,4 +1,4 @@
-module github.com/luizvnasc/cwbus.io
+module github.com/luizvnasc/cwbus-hist
 
 go 1.12
 

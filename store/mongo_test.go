@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/luizvnasc/cwbus.io/model"
+	"github.com/luizvnasc/cwbus-hist/model"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )

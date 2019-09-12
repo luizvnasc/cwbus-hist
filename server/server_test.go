@@ -18,7 +18,7 @@ func TestServer(t *testing.T) {
 	t.Run("Iniciando servidor sem informar a porta", func(t *testing.T) {
 		quit := make(chan bool)
 		defer close(quit)
-		server := runServer(t,"",quit)
+		server := runServer(t, "", quit)
 		defer server.Shutdown()
 
 		_, err := net.Dial("tcp", ":"+port)
@@ -31,7 +31,7 @@ func TestServer(t *testing.T) {
 	t.Run(fmt.Sprintf("Inciando servidor na porta %q", port), func(t *testing.T) {
 		quit := make(chan bool)
 		defer close(quit)
-		server := runServer(t,port,quit)
+		server := runServer(t, port, quit)
 		defer server.Shutdown()
 		_, err := net.Dial("tcp", ":"+port)
 		if err != nil {
@@ -42,7 +42,7 @@ func TestServer(t *testing.T) {
 	})
 }
 
-func TestRoutes(t *testing.T){
+func TestRoutes(t *testing.T) {
 	// Testando rotas do servidor
 	testCases := []struct {
 		path   string
@@ -56,7 +56,7 @@ func TestRoutes(t *testing.T){
 
 	quit := make(chan bool)
 	defer close(quit)
-	server := runServer(t,port, quit)
+	server := runServer(t, port, quit)
 	defer server.Shutdown()
 
 	client := &http.Client{}
