@@ -1,10 +1,10 @@
 // Package jobs contém os jobs que serão executados para consumir os serviços da urbs
-package jobs
+package scheduler
 
 import (
 	"log"
 
-	"github.com/luizvnasc/cwbus-hist/jobs/task"
+	"github.com/luizvnasc/cwbus-hist/scheduler/task"
 	"github.com/robfig/cron/v3"
 )
 
@@ -30,13 +30,16 @@ func (j *Job) Task() func() {
 type Jobs []*Job
 
 // New é um construtor de Job
-func New(spec string, task func()) *Job {
+func NewJob(spec string, task func()) *Job {
 	return &Job{spec, task}
 }
 
-var jobs = Jobs{
-	New("*/3 * * * *", task.WakeUp),
+//Scheduler é uma interface para os agendadores de tarefas
+type Scheduler interface {
+	Execute() 
+	Terminate()
 }
+
 
 // Execute inicia a execução dos jobs.
 func Execute() {
@@ -46,11 +49,11 @@ func Execute() {
 		if err != nil {
 			log.Fatalf("Erro ao adicionar job: %q", err)
 		}
-		log.Printf("Job adicionado. ID: %q",id)
+		log.Printf("Job adicionado. ID: %q", id)
 	}
 	log.Printf("Iniciando Jobs...")
 	c.Start()
-	
+
 }
 
 // Terminate para a execução dos jobs.
