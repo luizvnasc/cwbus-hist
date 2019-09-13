@@ -30,6 +30,9 @@ func (r *Route) Methods() []string {
 
 // NewRoute cria uma rota.
 func NewRoute(path string, methods []string, handler HandlerFunc) *Route {
+	if path == "" || len(methods) == 0 || handler == nil {
+		return nil
+	}
 	return &Route{path, methods, handler}
 }
 
