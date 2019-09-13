@@ -5,6 +5,7 @@ package main
 import (
 	"os"
 
+	"github.com/luizvnasc/cwbus-hist/jobs"
 	"github.com/luizvnasc/cwbus-hist/server"
 )
 
@@ -17,6 +18,7 @@ func main() {
 	// }
 
 	//store := store.NewMongoStore(ctx, client)
+	jobs.Execute()
 	app := server.New(os.Getenv("PORT"))
 	app.Run()
 	//store.Disconnect()
