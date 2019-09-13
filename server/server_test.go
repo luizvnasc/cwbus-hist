@@ -84,6 +84,7 @@ func runServer(t *testing.T, port string, quit chan bool) (server *CwbusServer) 
 				return
 			}
 		}
+
 	}()
 	// Espera o servidor subir
 	time.Sleep(30 * time.Millisecond)
