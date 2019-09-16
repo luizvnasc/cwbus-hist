@@ -1,14 +1,17 @@
 // Package jobs contém os jobs que serão executados para consumir os serviços da urbs
 package scheduler
 
-import (
-	"log"
+// Error é um erro do pacote scheduler
+type Error string
 
-	"github.com/luizvnasc/cwbus-hist/scheduler/task"
-	"github.com/robfig/cron/v3"
+func (e Error) Error() string {
+	return string(e)
+}
+
+const (
+	// ErrNoCron : "Cron não informado"
+	ErrNoCron = Error("Cron não informado")
 )
-
-var c *cron.Cron
 
 // Job é um trabalho que será executado de acordo com sua especificação.
 type Job struct {
@@ -36,28 +39,6 @@ func NewJob(spec string, task func()) *Job {
 
 //Scheduler é uma interface para os agendadores de tarefas
 type Scheduler interface {
-	Execute() 
+	Execute()
 	Terminate()
-}
-
-
-// Execute inicia a execução dos jobs.
-func Execute() {
-	c = cron.New()
-	for _, job := range jobs {
-		id, err := c.AddFunc(job.Spec(), job.Task())
-		if err != nil {
-			log.Fatalf("Erro ao adicionar job: %q", err)
-		}
-		log.Printf("Job adicionado. ID: %q", id)
-	}
-	log.Printf("Iniciando Jobs...")
-	c.Start()
-
-}
-
-// Terminate para a execução dos jobs.
-func Terminate() {
-	log.Printf("Finalizando Jobs...")
-	c.Stop()
 }
