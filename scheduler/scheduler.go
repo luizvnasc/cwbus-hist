@@ -11,6 +11,8 @@ func (e Error) Error() string {
 const (
 	// ErrNoCron : "Cron não informado"
 	ErrNoCron = Error("Cron não informado")
+	// ErrNoUrbsCode : "Código de acesso aos serviços da urbs não encontrado."
+	ErrNoUrbsCode = Error("Código de acesso aos serviços da urbs não encontrado.")
 )
 
 // Job é um trabalho que será executado de acordo com sua especificação.
@@ -24,7 +26,7 @@ func (j *Job) Spec() string {
 	return j.spec
 }
 
-// Spec getter
+// Task getter
 func (j *Job) Task() func() {
 	return j.task
 }

@@ -2,7 +2,6 @@ package store
 
 import (
 	"context"
-	"log"
 	"os"
 	"time"
 
@@ -29,25 +28,37 @@ func NewMongoStore(ctx context.Context, client *mongo.Client) (store *MongoStore
 func (ms *MongoStore) SaveLinhas(linhas model.Linhas) (err error) {
 	var operations []mongo.WriteModel
 	coll := ms.db.Collection("linhas")
+	filtro := bson.M{}
+
+	var linhasCadastradas model.Linhas
+	cur, err := coll.Find(ms.ctx, filtro)
+
+	if err != nil {
+		return err
+	}
+	for cur.Next(ms.ctx) {
+		var linha model.Linha
+		err := cur.Decode(&linha)
+		if err != nil {
+			return err
+		}
+		linhasCadastradas = append(linhasCadastradas, linha)
+	}
 
 	for _, linha := range linhas {
-		filtro := bson.M{"cod": linha.Codigo}
-
-		var l model.Linha
-		err = coll.FindOne(ms.ctx, filtro).Decode(&l)
-
-		switch {
-		case err == nil:
-			log.Printf("linha %d encontrada. Atualizando data de atualização.", l.Codigo)
-			l.AtualizadoEm = time.Now().UnixNano()
-		case err.Error() == "mongo: no documents in result":
-			log.Printf("linha %d não encontrada. Inserindo linha na base.", l.Codigo)
-			l = linha
-			l.AtualizadoEm = time.Now().UnixNano()
-			l.CriadoEm = time.Now().UnixNano()
-		default:
-			log.Printf("Erro ao inserir Linhas: %q", err)
-			return
+		var l *model.Linha
+		for _, linhaCadastrada := range linhasCadastradas {
+			if linhaCadastrada.Codigo == linha.Codigo {
+				l = &linhaCadastrada
+				break
+			}
+		}
+		if l != nil {
+			l.AtualizadoEm = time.Now().Unix()
+		} else {
+			l = &linha
+			l.AtualizadoEm = time.Now().Unix()
+			l.CriadoEm = time.Now().Unix()
 		}
 
 		operation := mongo.NewUpdateOneModel()

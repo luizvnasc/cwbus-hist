@@ -24,7 +24,7 @@ package model
 // ]
 type Linha struct {
 	//ID               primitive.ObjectID `json:"_id" bson:"_id"`
-	Codigo           int    `json:"cod" bson:"cod"`
+	Codigo           string `json:"cod" bson:"cod"`
 	Nome             string `json:"nome" bson:"nome"`
 	SomenteCartao    string `json:"somente_cartao" bson:"somente_cartao"`
 	CategoriaServico string `json:"categoria_servico" bson:"categoria_servico"`
