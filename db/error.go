@@ -9,6 +9,8 @@ func (e Error) Error() string {
 }
 
 const (
-	//ErrNoConnString : String de conexão não informado
+	// ErrNoConnString : String de conexão não informado
 	ErrNoConnString = Error("String de conexão não informado")
+	// ErrNoContext : Contexto não informado
+	ErrNoContext = Error("Contexto não informado")
 )
