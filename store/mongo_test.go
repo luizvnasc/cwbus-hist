@@ -13,7 +13,7 @@ import (
 
 var linhas = model.Linhas{
 	model.Linha{
-		Codigo:           464,
+		Codigo:           "464",
 		Nome:             "A. MUNHOZ / J. BOTÂNICO",
 		SomenteCartao:    "S",
 		CategoriaServico: "CONVENCIONAL",

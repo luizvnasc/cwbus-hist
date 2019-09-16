@@ -22,7 +22,6 @@ type UrbsScheduler struct {
 
 func (us *UrbsScheduler) getLinhas() {
 	res, err := http.Get(fmt.Sprintf("http://transporteservico.urbs.curitiba.pr.gov.br/getLinhas.php?c=%s", us.code))
-	log.Printf("%v\n", us.code)
 	if err != nil {
 		log.Printf("Erro ao obter Linhas: %q", err)
 		return
@@ -54,7 +53,6 @@ func NewUrbsScheduler(c *cron.Cron, store store.Storer) (*UrbsScheduler, error) 
 		return nil, ErrNoCron
 	}
 	code := os.Getenv("CWBUS_URBS_CODE")
-	log.Printf("code: %s\n",code)
 	if len(code) == 0 {
 		return nil, ErrNoUrbsCode
 	}
