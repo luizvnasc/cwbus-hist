@@ -7,13 +7,11 @@ import (
 
 	"github.com/luizvnasc/cwbus-hist/db"
 	"github.com/luizvnasc/cwbus-hist/store"
-	"github.com/robfig/cron/v3"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func TestUrbsScheduler(t *testing.T) {
-	c := cron.New()
 	ctx := context.Background()
 	client, err := db.NewMongoClient(ctx, os.Getenv("CWBUS_DB_URL"))
 	if err != nil {
@@ -23,7 +21,7 @@ func TestUrbsScheduler(t *testing.T) {
 
 	t.Run("Criar Urbs Scheduler", func(t *testing.T) {
 
-		scheduler, err := NewUrbsScheduler(c, s)
+		scheduler, err := NewUrbsScheduler(s)
 
 		if err != nil {
 			t.Errorf("Erro ao criar scheduler de jobs da urbs: %v", err)
@@ -33,18 +31,8 @@ func TestUrbsScheduler(t *testing.T) {
 		}
 	})
 
-	t.Run("Criar Urbs Scheduler sem informar cron", func(t *testing.T) {
-
-		_, err := NewUrbsScheduler(nil, s)
-
-		if err != ErrNoCron {
-			t.Errorf("Erro ao criar scheduler de jobs da urbs: Esperava-se %q, obteve-se %v", ErrNoCron, err)
-		}
-
-	})
-
 	t.Run("getLinhas Task", func(t *testing.T) {
-		scheduler, _ := NewUrbsScheduler(c, s)
+		scheduler, _ := NewUrbsScheduler(s)
 		scheduler.getLinhas()
 		linhas := client.Database(os.Getenv("CWBUS_DB_HIST")).Collection("linhas")
 		AssertNumberOfDocuments(ctx, t, linhas, 311)
@@ -52,7 +40,7 @@ func TestUrbsScheduler(t *testing.T) {
 
 	t.Run("Criar Urbs Scheduler sem informar sem código urbs", func(t *testing.T) {
 		os.Setenv("CWBUS_URBS_CODE", "")
-		_, err := NewUrbsScheduler(c, s)
+		_, err := NewUrbsScheduler(s)
 
 		if err != ErrNoUrbsCode {
 			t.Errorf("Erro ao criar scheduler de jobs da urbs: Esperava-se %q, obteve-se %v", ErrNoUrbsCode, err)

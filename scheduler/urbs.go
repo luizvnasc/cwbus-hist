@@ -18,15 +18,18 @@ type UrbsScheduler struct {
 	cron  *cron.Cron
 	store store.Storer
 	code  string
+	jobs  Jobs
 }
 
+
+// Task que recupera as linhas do serviço da urbs e salva no banco.
 func (us *UrbsScheduler) getLinhas() {
 	res, err := http.Get(fmt.Sprintf("http://transporteservico.urbs.curitiba.pr.gov.br/getLinhas.php?c=%s", us.code))
 	if err != nil {
 		log.Printf("Erro ao obter Linhas: %q", err)
 		return
 	}
-	
+
 	result, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		log.Printf("Erro ao let body do serviço getLinhas: %q", err)
@@ -47,14 +50,27 @@ func (us *UrbsScheduler) getLinhas() {
 
 }
 
-// NewUrbsScheduler é um construtor da estrutura UrbsScheduler
-func NewUrbsScheduler(c *cron.Cron, store store.Storer) (*UrbsScheduler, error) {
-	if c == nil {
-		return nil, ErrNoCron
+// Execute inicia a execução dos jobs do scheduler
+func (us *UrbsScheduler) Execute() {
+	for _, job := range us.jobs {
+		us.cron.AddFunc(job.Spec(), job.Task())
 	}
+	us.cron.Start()
+}
+
+// Terminate para a execução do scheduler
+func (us *UrbsScheduler) Terminate() {
+	us.cron.Stop()
+}
+
+// NewUrbsScheduler é um construtor da estrutura UrbsScheduler
+func NewUrbsScheduler(store store.Storer) (*UrbsScheduler, error) {
+	c := cron.New()
 	code := os.Getenv("CWBUS_URBS_CODE")
 	if len(code) == 0 {
 		return nil, ErrNoUrbsCode
 	}
-	return &UrbsScheduler{cron: c, store: store, code: code}, nil
+	scheduler := &UrbsScheduler{cron: c, store: store, code: code}
+	scheduler.jobs = append(scheduler.jobs,NewJob("@daily 3h", scheduler.getLinhas))
+	return scheduler, nil
 }
