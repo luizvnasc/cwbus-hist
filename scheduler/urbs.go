@@ -71,6 +71,6 @@ func NewUrbsScheduler(store store.Storer) (*UrbsScheduler, error) {
 		return nil, ErrNoUrbsCode
 	}
 	scheduler := &UrbsScheduler{cron: c, store: store, code: code}
-	scheduler.jobs = append(scheduler.jobs,NewJob("@daily 3h", scheduler.getLinhas))
+	scheduler.jobs = append(scheduler.jobs,NewJob("@hourly", scheduler.getLinhas))
 	return scheduler, nil
 }
