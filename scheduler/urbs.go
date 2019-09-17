@@ -21,7 +21,6 @@ type UrbsScheduler struct {
 	jobs  Jobs
 }
 
-
 // Task que recupera as linhas do serviço da urbs e salva no banco.
 func (us *UrbsScheduler) getLinhas() {
 	res, err := http.Get(fmt.Sprintf("http://transporteservico.urbs.curitiba.pr.gov.br/getLinhas.php?c=%s", us.code))
@@ -50,6 +49,27 @@ func (us *UrbsScheduler) getLinhas() {
 
 }
 
+func (us *UrbsScheduler) getPontosLinhas(codigo string) (pontos model.Pontos, err error) {
+	res, err := http.Get(fmt.Sprintf("http://transporteservico.urbs.curitiba.pr.gov.br/getPontosLinha.php?linha=%s&c=%s", codigo, us.code))
+	if err != nil {
+		log.Printf("Erro ao obter Linhas: %q", err)
+		return
+	}
+
+	result, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		log.Printf("Erro ao let body do serviço getLinhas: %q", err)
+		return
+	}
+	defer res.Body.Close()
+
+	if err = json.Unmarshal(result, &pontos); err != nil {
+		log.Printf("Erro ao converter json de linhas para struct Linha: %q", err)
+		return
+	}
+	return
+}
+
 // Execute inicia a execução dos jobs do scheduler
 func (us *UrbsScheduler) Execute() {
 	for _, job := range us.jobs {
@@ -71,6 +91,6 @@ func NewUrbsScheduler(store store.Storer) (*UrbsScheduler, error) {
 		return nil, ErrNoUrbsCode
 	}
 	scheduler := &UrbsScheduler{cron: c, store: store, code: code}
-	scheduler.jobs = append(scheduler.jobs,NewJob("@hourly", scheduler.getLinhas))
+	scheduler.jobs = append(scheduler.jobs, NewJob("@hourly", scheduler.getLinhas))
 	return scheduler, nil
 }

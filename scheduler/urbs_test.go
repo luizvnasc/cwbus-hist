@@ -31,18 +31,19 @@ func TestUrbsScheduler(t *testing.T) {
 		}
 	})
 
-	t.Run("getLinhas Task", func(t *testing.T) {
+	t.Run("getLinhas Task Caminho feliz", func(t *testing.T) {
 		scheduler, _ := NewUrbsScheduler(s)
 		scheduler.getLinhas()
 		linhas := client.Database(os.Getenv("CWBUS_DB_HIST")).Collection("linhas")
 		AssertNumberOfDocuments(ctx, t, linhas, 311)
 	})
 
-	t.Run("getPontosLinhas Task", func(t *testing.T){
+	t.Run("getPontosLinhas Task Caminho feliz", func(t *testing.T) {
 		scheduler, _ := NewUrbsScheduler(s)
-		scheduler.getLinhas()
-		linhas := client.Database(os.Getenv("CWBUS_DB_HIST")).Collection("linhas")
-		AssertNumberOfDocuments(ctx, t, linhas, 311)
+		pontos, _ := scheduler.getPontosLinhas("464")
+		if len(pontos) != 59 {
+			t.Errorf("Erro ao contar os pontos da linha. Esperava-se %d, obteve-se %d", 59, len(pontos))
+		}
 	})
 
 	t.Run("Criar Urbs Scheduler sem informar sem código urbs", func(t *testing.T) {
