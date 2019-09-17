@@ -42,6 +42,14 @@ func (us *UrbsScheduler) getLinhas() {
 		return
 	}
 
+	for i := range linhas {
+		pontos, err := us.getPontosLinhas(linhas[i].Codigo)
+		if err != nil {
+			log.Printf("Erro ao obter pontos da linha %s: %q", linhas[i].Codigo, err)
+			return
+		}
+		linhas[i].Pontos = pontos
+	}
 	if err := us.store.SaveLinhas(linhas); err != nil {
 		log.Printf("Erro ao salvar linhas no banco: %q", err)
 		return
@@ -67,6 +75,7 @@ func (us *UrbsScheduler) getPontosLinhas(codigo string) (pontos model.Pontos, er
 		log.Printf("Erro ao converter json de linhas para struct Linha: %q", err)
 		return
 	}
+
 	return
 }
 

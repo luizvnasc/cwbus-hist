@@ -50,12 +50,15 @@ func (ms *MongoStore) SaveLinhas(linhas model.Linhas) (err error) {
 		for _, linhaCadastrada := range linhasCadastradas {
 			if linhaCadastrada.Codigo == linha.Codigo {
 				l = &linhaCadastrada
+				l.Pontos = linha.Pontos
 				break
 			}
 		}
 		if l != nil {
+			//fmt.Printf("linha %q já cadastrada\n", l.Codigo)
 			l.AtualizadoEm = time.Now().Unix()
 		} else {
+			//fmt.Printf("linha %q é nova\n", l.Codigo)
 			l = &linha
 			l.AtualizadoEm = time.Now().Unix()
 			l.CriadoEm = time.Now().Unix()
@@ -63,8 +66,8 @@ func (ms *MongoStore) SaveLinhas(linhas model.Linhas) (err error) {
 
 		operation := mongo.NewUpdateOneModel()
 		operation.SetUpsert(true)
-		operation.SetFilter(filtro)
-		operation.SetUpdate(l)
+		operation.SetFilter(bson.M{"cod": l.Codigo})
+		operation.SetUpdate(*l)
 		operations = append(operations, operation)
 	}
 
