@@ -2,7 +2,6 @@ package scheduler
 
 import (
 	"bytes"
-	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -26,7 +25,6 @@ func TestAppScheduler(t *testing.T) {
 		s := NewAppScheduler()
 		s.wakeUpDyno()
 		got := buf.String()
-		fmt.Printf("got: %s", got)
 		if !strings.Contains(got, "Erro ao acordar o dyno:") {
 			t.Errorf("Erro ao validar url na task wakeup.")
 		}
@@ -45,8 +43,25 @@ func TestAppScheduler(t *testing.T) {
 		s := NewAppScheduler()
 		s.wakeUpDyno()
 		got := buf.String()
-		fmt.Printf("got: %s", got)
 		if !strings.Contains(got, "Erro ao acordar o dyno, Status:") {
+			t.Errorf("Erro ao validar status na task wakeup.")
+		}
+	})
+
+	t.Run("Teste acordar dyno", func(t *testing.T) {
+		var buf bytes.Buffer
+
+		log.SetOutput(&buf)
+		defer func() {
+			log.SetOutput(os.Stderr)
+		}()
+
+		os.Setenv("CWBUS_WAKEUP_URL", "https://httpstat.us/200")
+
+		s := NewAppScheduler()
+		s.wakeUpDyno()
+		got := buf.String()
+		if !strings.Contains(got, "Trabalho...") {
 			t.Errorf("Erro ao validar status na task wakeup.")
 		}
 	})
