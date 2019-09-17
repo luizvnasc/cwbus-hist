@@ -73,6 +73,24 @@ func (ms *MongoStore) SaveLinhas(linhas model.Linhas) (err error) {
 	return
 }
 
+// Linhas lista as linhas armazenadas no banco.
+func (ms *MongoStore) Linhas() (linhas model.Linhas, err error) {
+	cur, err := ms.db.Collection("linhas").Find(ms.ctx, bson.D{})
+	if err != nil {
+		return
+	}
+	for cur.Next(ms.ctx) {
+		var linha model.Linha
+		err = cur.Decode(&linha)
+		if err != nil {
+			linhas = model.Linhas{}
+			return
+		}
+		linhas = append(linhas, linha)
+	}
+	return
+}
+
 // Disconnect desconecta a store do banco
 func (ms *MongoStore) Disconnect() {
 	ms.client.Disconnect(ms.ctx)

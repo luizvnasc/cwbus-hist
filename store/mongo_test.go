@@ -32,6 +32,15 @@ func TestMongoStore(t *testing.T) {
 			t.Errorf("Erro ao salvar linhas no BD: %q", err)
 		}
 	})
+	t.Run("Listar Linhas do banco", func(t *testing.T) {
+		linhas, err := store.Linhas()
+		if err != nil {
+			t.Errorf("Erro ao obter as linhas cadastradas: %q", err)
+		}
+		if len(linhas) != 311 {
+			t.Errorf("Erro ao contar Linhas. Esperava-se %d linhas, obteve-se %d", 311, len(linhas))
+		}
+	})
 }
 
 // Helper que cria uma conexão com a base de dados.
