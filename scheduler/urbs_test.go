@@ -38,6 +38,13 @@ func TestUrbsScheduler(t *testing.T) {
 		AssertNumberOfDocuments(ctx, t, linhas, 311)
 	})
 
+	t.Run("getPontosLinhas Task", func(t *testing.T){
+		scheduler, _ := NewUrbsScheduler(s)
+		scheduler.getLinhas()
+		linhas := client.Database(os.Getenv("CWBUS_DB_HIST")).Collection("linhas")
+		AssertNumberOfDocuments(ctx, t, linhas, 311)
+	})
+
 	t.Run("Criar Urbs Scheduler sem informar sem código urbs", func(t *testing.T) {
 		os.Setenv("CWBUS_URBS_CODE", "")
 		_, err := NewUrbsScheduler(s)
