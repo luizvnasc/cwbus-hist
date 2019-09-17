@@ -25,18 +25,23 @@ func main() {
 	log.Println("Criando store")
 	s := store.NewMongoStore(ctx, client)
 	defer s.Disconnect()
-	
+
 	log.Println("Iniciando Schedulers")
+	appScheduler := scheduler.NewAppScheduler()
 	urbsScheduler, err := scheduler.NewUrbsScheduler(s)
 	if err != nil {
 		log.Fatalf("Erro ao iniciar o schduler da urbs")
 	}
-	urbsScheduler.Execute()
-	defer urbsScheduler.Terminate()
-	
-	
+
+	schedulers := []scheduler.Scheduler{appScheduler, urbsScheduler}
+
+	for _, s := range schedulers {
+		s.Execute()
+		defer s.Terminate()
+	}
+
 	log.Println("Iniciando servidor")
 	app := server.New(os.Getenv("PORT"))
 	app.Run()
-	
+
 }
