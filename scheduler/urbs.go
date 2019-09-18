@@ -7,6 +7,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sync"
+	"time"
 
 	"github.com/luizvnasc/cwbus-hist/model"
 	"github.com/luizvnasc/cwbus-hist/store"
@@ -42,14 +44,6 @@ func (us *UrbsScheduler) getLinhas() {
 		return
 	}
 
-	for i := range linhas {
-		pontos, err := us.getPontosLinhas(linhas[i].Codigo)
-		if err != nil {
-			log.Printf("Erro ao obter pontos da linha %s: %q", linhas[i].Codigo, err)
-			return
-		}
-		linhas[i].Pontos = pontos
-	}
 	if err := us.store.SaveLinhas(linhas); err != nil {
 		log.Printf("Erro ao salvar linhas no banco: %q", err)
 		return
@@ -57,26 +51,61 @@ func (us *UrbsScheduler) getLinhas() {
 
 }
 
-func (us *UrbsScheduler) getPontosLinhas(codigo string) (pontos model.Pontos, err error) {
+// getPontosLinhas recebe como parâmetro uma lista de linhas e armazena seus respectivos pontos.
+func (us *UrbsScheduler) getPontosLinhas(linhas model.Linhas) (model.Linhas, error) {
+	errChannels := make([]chan error, len(linhas))
+	dataChannels := make([]chan model.Pontos, len(linhas))
+
+	for i := range errChannels {
+		errChannels[i] = make(chan error, 1)
+		dataChannels[i] = make(chan model.Pontos, 1)
+		defer close(errChannels[i])
+		defer close(dataChannels[i])
+	}
+
+	var wg sync.WaitGroup
+	wg.Add(len(linhas))
+
+	for i, linha := range linhas {
+		go us.getPontos(&wg, errChannels[i], dataChannels[i], linha.Codigo)
+		time.Sleep(3 * time.Millisecond) //evita reset de conexão
+	}
+	wg.Wait()
+
+	for i := range linhas {
+		select {
+		case err := <-errChannels[i]:
+			log.Printf("Erro ao obter pontos da linha %s: %q", linhas[i].Codigo, err)
+			return model.Linhas{}, nil
+		case pontos := <-dataChannels[i]:
+			linhas[i].Pontos = pontos
+		}
+	}
+	return linhas, nil
+}
+
+// getPontos obtém os pontos de3 uma determinada linha
+func (us *UrbsScheduler) getPontos(wg *sync.WaitGroup, errChan chan error, dataChan chan model.Pontos, codigo string) {
+	defer wg.Done()
 	res, err := http.Get(fmt.Sprintf("http://transporteservico.urbs.curitiba.pr.gov.br/getPontosLinha.php?linha=%s&c=%s", codigo, us.code))
 	if err != nil {
-		log.Printf("Erro ao obter Linhas: %q", err)
+		errChan <- err
 		return
 	}
 
 	result, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		log.Printf("Erro ao let body do serviço getLinhas: %q", err)
+		errChan <- err
 		return
 	}
 	defer res.Body.Close()
-
+	var pontos model.Pontos
 	if err = json.Unmarshal(result, &pontos); err != nil {
-		log.Printf("Erro ao converter json de linhas para struct Linha: %q", err)
+		errChan <- err
 		return
 	}
+	dataChan <- pontos
 
-	return
 }
 
 // Execute inicia a execução dos jobs do scheduler

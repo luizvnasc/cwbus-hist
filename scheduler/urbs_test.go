@@ -3,9 +3,11 @@ package scheduler
 import (
 	"context"
 	"os"
+	"sync"
 	"testing"
 
 	"github.com/luizvnasc/cwbus-hist/db"
+	"github.com/luizvnasc/cwbus-hist/model"
 	"github.com/luizvnasc/cwbus-hist/store"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -38,11 +40,45 @@ func TestUrbsScheduler(t *testing.T) {
 		AssertNumberOfDocuments(ctx, t, linhas, 311)
 	})
 
-	t.Run("getPontosLinhas Task Caminho feliz", func(t *testing.T) {
+	t.Run("getPontos Task Caminho feliz", func(t *testing.T) {
 		scheduler, _ := NewUrbsScheduler(s)
-		pontos, _ := scheduler.getPontosLinhas("464")
-		if len(pontos) != 59 {
-			t.Errorf("Erro ao contar os pontos da linha. Esperava-se %d, obteve-se %d", 59, len(pontos))
+
+		var wg sync.WaitGroup
+
+		errChan := make(chan error, 1)
+		dataChan := make(chan model.Pontos, 1)
+		defer close(errChan)
+		defer close(dataChan)
+		wg.Add(1)
+		go scheduler.getPontos(&wg, errChan, dataChan, "464")
+		wg.Wait()
+
+		select {
+		case <-errChan:
+			t.Errorf("Erro ao obter pontos de uma linha: %q", err)
+		case pontos := <-dataChan:
+			if len(pontos) != 59 {
+				t.Errorf("Erro ao contar os pontos da linha. Esperava-se %d, obteve-se %d", 59, len(pontos))
+			}
+		}
+
+	})
+
+	t.Run("getPontosLinhas", func(t *testing.T) {
+		scheduler, _ := NewUrbsScheduler(s)
+		linhas, _ := scheduler.store.Linhas()
+		//Reinicia os pontos das linhas
+		for i := range linhas {
+			linhas[i].Pontos = model.Pontos{}
+		}
+		linhas, err := scheduler.getPontosLinhas(linhas)
+		if err != nil {
+			t.Errorf("Erro ao obter os pontos das linhas: %q", err)
+		}
+		for i := range linhas {
+			if len(linhas[i].Pontos) == 0 {
+				t.Errorf("Erro ao obter os pontos das linhas %q. Pontos: %v", linhas[i].Codigo, linhas[i].Pontos)
+			}
 		}
 	})
 
