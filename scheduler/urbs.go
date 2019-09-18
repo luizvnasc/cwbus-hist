@@ -25,6 +25,7 @@ type UrbsScheduler struct {
 
 // Task que recupera as linhas do serviço da urbs e salva no banco.
 func (us *UrbsScheduler) getLinhas() {
+	log.Println("Obtendo linhas...")
 	res, err := http.Get(fmt.Sprintf("http://transporteservico.urbs.curitiba.pr.gov.br/getLinhas.php?c=%s", us.code))
 	if err != nil {
 		log.Printf("Erro ao obter Linhas: %q", err)
@@ -44,11 +45,13 @@ func (us *UrbsScheduler) getLinhas() {
 		return
 	}
 
+	us.getPontosLinhas(linhas)
+
 	if err := us.store.SaveLinhas(linhas); err != nil {
 		log.Printf("Erro ao salvar linhas no banco: %q", err)
 		return
 	}
-
+	log.Println("Linhas obtidas com sucesso.")
 }
 
 // getPontosLinhas recebe como parâmetro uma lista de linhas e armazena seus respectivos pontos.
@@ -129,6 +132,6 @@ func NewUrbsScheduler(store store.Storer) (*UrbsScheduler, error) {
 		return nil, ErrNoUrbsCode
 	}
 	scheduler := &UrbsScheduler{cron: c, store: store, code: code}
-	scheduler.jobs = append(scheduler.jobs, NewJob("* 5 * * * *", scheduler.getLinhas))
+	scheduler.jobs = append(scheduler.jobs, NewJob("0 5 * * *", scheduler.getLinhas))
 	return scheduler, nil
 }
