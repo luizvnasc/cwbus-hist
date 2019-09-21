@@ -7,17 +7,16 @@ import (
 	"log"
 	"os"
 
+	"github.com/luizvnasc/cwbus-hist/db"
 	"github.com/luizvnasc/cwbus-hist/scheduler"
 	"github.com/luizvnasc/cwbus-hist/server"
 	"github.com/luizvnasc/cwbus-hist/store"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func main() {
 	log.Println("Criando cliente mongodb")
 	ctx := context.Background()
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(os.Getenv("CWBUS_DB_URL")))
+	client, err := db.NewMongoClient(ctx, os.Getenv("CWBUS_DB_URL"))
 	if err != nil {
 		log.Fatalf("Erro ao conectar no banco: %q", err)
 		os.Exit(1)

@@ -1,4 +1,4 @@
-// Package jobs contém os jobs que serão executados para consumir os serviços da urbs
+// Package scheduler contém os jobs que serão executados para consumir os serviços da urbs
 package scheduler
 
 // Error é um erro do pacote scheduler
@@ -13,6 +13,8 @@ const (
 	ErrNoCron = Error("Cron não informado")
 	// ErrNoUrbsCode : "Código de acesso aos serviços da urbs não encontrado."
 	ErrNoUrbsCode = Error("Código de acesso aos serviços da urbs não encontrado.")
+	// ErrNoServiceURL : "URL do serviço da urbs não informado."
+	ErrNoServiceURL = Error("URL do serviço da urbs não informado.")
 )
 
 // Job é um trabalho que será executado de acordo com sua especificação.
@@ -34,7 +36,7 @@ func (j *Job) Task() func() {
 // Jobs é uma lista de jobs
 type Jobs []*Job
 
-// New é um construtor de Job
+// NewJob é um construtor de Job
 func NewJob(spec string, task func()) *Job {
 	return &Job{spec, task}
 }

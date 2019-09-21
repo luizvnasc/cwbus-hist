@@ -14,7 +14,7 @@ type Linha struct {
 	Nome             string `json:"nome" bson:"nome"`                           //  Nome da linha (UTF-8)
 	SomenteCartao    string `json:"somente_cartao" bson:"somente_cartao"`       // S: Sim, N: Não, F: Finais de Semana
 	CategoriaServico string `json:"categoria_servico" bson:"categoria_servico"` //Categoria da Linha (UTF-8)
-	Cor              string `json:"nome_cor" bson:"cor"`                             // Cor do ônibus
+	Cor              string `json:"nome_cor" bson:"cor"`                        // Cor do ônibus
 	CriadoEm         int64  `json:"criado_em" bson:"criado_em"`                 //Data de criação do registro
 	AtualizadoEm     int64  `json:"atualizado_em" bson:"atualizado_em"`         // Data de atualização do registro
 	Pontos           Pontos `json:"pontos" bson:"pontos"`                       // Pontos da Linha

@@ -17,16 +17,17 @@ import (
 
 // UrbsScheduler é um agenda os jobs referentes ao serviço da urbs que serão executados.
 type UrbsScheduler struct {
-	cron  *cron.Cron
-	store store.Storer
-	code  string
-	jobs  Jobs
+	cron       *cron.Cron
+	store      store.Storer
+	code       string
+	serviceURL string
+	jobs       Jobs
 }
 
 // Task que recupera as linhas do serviço da urbs e salva no banco.
 func (us *UrbsScheduler) getLinhas() {
 	log.Println("Obtendo linhas...")
-	res, err := http.Get(fmt.Sprintf("http://transporteservico.urbs.curitiba.pr.gov.br/getLinhas.php?c=%s", us.code))
+	res, err := http.Get(fmt.Sprintf("%s/getLinhas.php?c=%s", us.serviceURL, us.code))
 	if err != nil {
 		log.Printf("Erro ao obter Linhas: %q", err)
 		return
@@ -87,10 +88,10 @@ func (us *UrbsScheduler) getPontosLinhas(linhas model.Linhas) (model.Linhas, err
 	return linhas, nil
 }
 
-// getPontos obtém os pontos de3 uma determinada linha
+// getPontos obtém os pontos de uma determinada linha
 func (us *UrbsScheduler) getPontos(wg *sync.WaitGroup, errChan chan error, dataChan chan model.Pontos, codigo string) {
 	defer wg.Done()
-	res, err := http.Get(fmt.Sprintf("http://transporteservico.urbs.curitiba.pr.gov.br/getPontosLinha.php?linha=%s&c=%s", codigo, us.code))
+	res, err := http.Get(fmt.Sprintf("%s/getPontosLinha.php?linha=%s&c=%s", us.serviceURL, codigo, us.code))
 	if err != nil {
 		errChan <- err
 		return
@@ -126,12 +127,19 @@ func (us *UrbsScheduler) Terminate() {
 
 // NewUrbsScheduler é um construtor da estrutura UrbsScheduler
 func NewUrbsScheduler(store store.Storer) (*UrbsScheduler, error) {
-	c := cron.New()
 	code := os.Getenv("CWBUS_URBS_CODE")
+	serviceURL := os.Getenv("CWBUS_URBS_SERVICE_URL")
 	if len(code) == 0 {
 		return nil, ErrNoUrbsCode
 	}
-	scheduler := &UrbsScheduler{cron: c, store: store, code: code}
+	if len(serviceURL) == 0 {
+		return nil, ErrNoServiceURL
+	}
+	scheduler := &UrbsScheduler{cron: cron.New(),
+		store:      store,
+		code:       code,
+		serviceURL: serviceURL,
+	}
 	scheduler.jobs = append(scheduler.jobs, NewJob("0 5 * * *", scheduler.getLinhas))
 	return scheduler, nil
 }

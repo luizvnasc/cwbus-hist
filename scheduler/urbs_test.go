@@ -1,8 +1,11 @@
 package scheduler
 
 import (
+	"bytes"
 	"context"
+	"log"
 	"os"
+	"strings"
 	"sync"
 	"testing"
 
@@ -32,12 +35,48 @@ func TestUrbsScheduler(t *testing.T) {
 			t.Error("Erro ao criar scheduler de jobs da urbs: scheduler é nulo")
 		}
 	})
+	t.Run("Criar Urbs Scheduler sem informar sem código urbs", func(t *testing.T) {
+		code := os.Getenv("CWBUS_URBS_CODE")
+		os.Setenv("CWBUS_URBS_CODE", "")
+		_, err := NewUrbsScheduler(s)
+
+		if err != ErrNoUrbsCode {
+			t.Errorf("Erro ao criar scheduler de jobs da urbs: Esperava-se %q, obteve-se %v", ErrNoUrbsCode, err)
+		}
+		os.Setenv("CWBUS_URBS_CODE", code)
+
+	})
+	t.Run("Criar Urbs Scheduler sem informar sem url de serviços da urbs", func(t *testing.T) {
+		url := os.Getenv("CWBUS_URBS_SERVICE_URL")
+		os.Setenv("CWBUS_URBS_SERVICE_URL", "")
+		_, err := NewUrbsScheduler(s)
+
+		if err != ErrNoServiceURL {
+			t.Errorf("Erro ao criar scheduler de jobs da urbs: Esperava-se %q, obteve-se %v", ErrNoServiceURL, err)
+		}
+		os.Setenv("CWBUS_URBS_SERVICE_URL", url)
+	})
 
 	t.Run("getLinhas Task Caminho feliz", func(t *testing.T) {
 		scheduler, _ := NewUrbsScheduler(s)
 		scheduler.getLinhas()
 		linhas := client.Database(os.Getenv("CWBUS_DB_HIST")).Collection("linhas")
 		AssertNumberOfDocuments(ctx, t, linhas, 311)
+	})
+
+	t.Run("getLinhas com url de serviço errada", func(t *testing.T) {
+		scheduler, _ := NewUrbsScheduler(s)
+		scheduler.serviceURL = ""
+
+		var buf bytes.Buffer
+		log.SetOutput(&buf)
+
+		scheduler.getLinhas()
+		got := buf.String()
+
+		if !strings.Contains(got, "Erro ao obter Linhas") {
+			t.Errorf("esperava-se um log de error, obteve-se: %q", got)
+		}
 	})
 
 	t.Run("getPontos Task Caminho feliz", func(t *testing.T) {
@@ -64,6 +103,30 @@ func TestUrbsScheduler(t *testing.T) {
 
 	})
 
+	t.Run("getPontos Task com url de serviço errada", func(t *testing.T) {
+		scheduler, _ := NewUrbsScheduler(s)
+		scheduler.serviceURL = ""
+		var wg sync.WaitGroup
+
+		errChan := make(chan error, 1)
+		dataChan := make(chan model.Pontos, 1)
+		defer close(errChan)
+		defer close(dataChan)
+		wg.Add(1)
+		go scheduler.getPontos(&wg, errChan, dataChan, "464")
+		wg.Wait()
+
+		select {
+		case got := <-errChan:
+			if got == nil {
+				t.Error("Esperava-se um erro ao obter pontos, obteve-se nil")
+			}
+		case <-dataChan:
+			t.Errorf("Não era esperado receber algo pelo canal de dados, obteve-se %v", <-dataChan)
+		}
+
+	})
+
 	t.Run("getPontosLinhas", func(t *testing.T) {
 		scheduler, _ := NewUrbsScheduler(s)
 		linhas, _ := scheduler.store.Linhas()
@@ -82,15 +145,6 @@ func TestUrbsScheduler(t *testing.T) {
 		}
 	})
 
-	t.Run("Criar Urbs Scheduler sem informar sem código urbs", func(t *testing.T) {
-		os.Setenv("CWBUS_URBS_CODE", "")
-		_, err := NewUrbsScheduler(s)
-
-		if err != ErrNoUrbsCode {
-			t.Errorf("Erro ao criar scheduler de jobs da urbs: Esperava-se %q, obteve-se %v", ErrNoUrbsCode, err)
-		}
-
-	})
 }
 
 func AssertNumberOfDocuments(ctx context.Context, t *testing.T, coll *mongo.Collection, want int64) {
