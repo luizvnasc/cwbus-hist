@@ -46,7 +46,14 @@ func (us *UrbsScheduler) getLinhas() {
 		return
 	}
 
-	us.getPontosLinhas(linhas)
+	linhas, err = us.getPontosLinhas(linhas)
+	if err != nil {
+		log.Printf("Erro ao obter os pontos das linhas: %q", err)
+	}
+	linhas, err = us.getTabelaLinhas(linhas)
+	if err != nil {
+		log.Printf("Erro ao obter a tabela das linhas: %q", err)
+	}
 
 	if err := us.store.SaveLinhas(linhas); err != nil {
 		log.Printf("Erro ao salvar linhas no banco: %q", err)
@@ -83,7 +90,7 @@ func (us *UrbsScheduler) getPontosLinhas(linhas model.Linhas) (model.Linhas, err
 		select {
 		case err := <-errChannels[i]:
 			log.Printf("Erro ao obter pontos da linha %s: %q", linhas[i].Codigo, err)
-			return model.Linhas{}, nil
+			return model.Linhas{}, err
 		case pontos := <-dataChannels[i]:
 			linhas[i].Pontos = pontos
 		}
@@ -113,6 +120,42 @@ func (us *UrbsScheduler) getPontos(wg *sync.WaitGroup, errChan chan error, dataC
 	}
 	dataChan <- pontos
 
+}
+
+// getTabelaLinhas recebe como parâmetro uma lista de linhas e armazena suas respectivas tabelas.
+// Esta função chama a função getTabelaLinha de forma concorrente e caso ocorra um erro ele ignora
+// os resultados corretos e não atualiza a tabela da linha.
+func (us *UrbsScheduler) getTabelaLinhas(linhas model.Linhas) (model.Linhas, error) {
+
+	errChannels := make([]chan error, len(linhas))
+	dataChannels := make([]chan model.Tabela, len(linhas))
+
+	for i := range errChannels {
+		errChannels[i] = make(chan error, 1)
+		dataChannels[i] = make(chan model.Tabela, 1)
+		defer close(errChannels[i])
+		defer close(dataChannels[i])
+	}
+
+	var wg sync.WaitGroup
+	wg.Add(len(linhas))
+
+	for i, linha := range linhas {
+		go us.getTabelaLinha(&wg, errChannels[i], dataChannels[i], linha.Codigo)
+		time.Sleep(3 * time.Millisecond) //evita reset de conexão
+	}
+	wg.Wait()
+
+	for i := range linhas {
+		select {
+		case err := <-errChannels[i]:
+			log.Printf("Erro ao obter Tabela da linha %s: %q", linhas[i].Codigo, err)
+			return model.Linhas{}, err
+		case tab := <-dataChannels[i]:
+			linhas[i].Tabela = tab
+		}
+	}
+	return linhas, nil
 }
 
 func (us *UrbsScheduler) getTabelaLinha(wg *sync.WaitGroup, errChan chan error, dataChan chan model.Tabela, codigo string) {

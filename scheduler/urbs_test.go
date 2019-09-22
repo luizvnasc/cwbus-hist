@@ -202,6 +202,19 @@ func TestUrbsScheduler(t *testing.T) {
 
 	})
 
+	t.Run("getTabelaLinhas", func(t *testing.T) {
+		scheduler, _ := NewUrbsScheduler(s)
+		linhas, _ := scheduler.store.Linhas()
+		//Reinicia os pontos das linhas
+		for i := range linhas {
+			linhas[i].Tabela = model.Tabela{}
+		}
+		linhas, err := scheduler.getTabelaLinhas(linhas)
+		if err != nil {
+			t.Errorf("Erro ao obter as tabelas das linhas: %q", err)
+		}
+	})
+
 }
 
 func AssertNumberOfDocuments(ctx context.Context, t *testing.T, coll *mongo.Collection, want int64) {

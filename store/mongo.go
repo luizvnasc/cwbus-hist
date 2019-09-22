@@ -51,6 +51,7 @@ func (ms *MongoStore) SaveLinhas(linhas model.Linhas) (err error) {
 			if linhaCadastrada.Codigo == linha.Codigo {
 				l = &linhaCadastrada
 				l.Pontos = linha.Pontos
+				l.Tabela = linha.Tabela
 				break
 			}
 		}

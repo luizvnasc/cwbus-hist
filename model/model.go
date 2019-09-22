@@ -18,6 +18,7 @@ type Linha struct {
 	CriadoEm         int64  `json:"criado_em" bson:"criado_em"`                 //Data de criação do registro
 	AtualizadoEm     int64  `json:"atualizado_em" bson:"atualizado_em"`         // Data de atualização do registro
 	Pontos           Pontos `json:"pontos" bson:"pontos"`                       // Pontos da Linha
+	Tabela           Tabela `json:"tabela" bson:"tabela"`                       // Tabela da linha
 }
 
 // Linhas é um slice de linhas. Criado apenas para melhorar a leitura do código
