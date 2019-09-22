@@ -115,6 +115,29 @@ func (us *UrbsScheduler) getPontos(wg *sync.WaitGroup, errChan chan error, dataC
 
 }
 
+func (us *UrbsScheduler) getTabelaLinha(wg *sync.WaitGroup, errChan chan error, dataChan chan model.Tabela, codigo string) {
+	defer wg.Done()
+
+	res, err := http.Get(fmt.Sprintf("%s/getTabelaLinha.php?linha=%s&c=%s", us.serviceURL, codigo, us.code))
+	if err != nil {
+		errChan <- err
+		return
+	}
+
+	result, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		errChan <- err
+		return
+	}
+	defer res.Body.Close()
+	var tabela model.Tabela
+	if err = json.Unmarshal(result, &tabela); err != nil {
+		errChan <- err
+		return
+	}
+	dataChan <- tabela
+}
+
 // Execute inicia a execução dos jobs do scheduler
 func (us *UrbsScheduler) Execute() {
 	for _, job := range us.jobs {

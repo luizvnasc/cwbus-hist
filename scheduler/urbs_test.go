@@ -8,6 +8,7 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/luizvnasc/cwbus-hist/db"
 	"github.com/luizvnasc/cwbus-hist/model"
@@ -143,6 +144,62 @@ func TestUrbsScheduler(t *testing.T) {
 				t.Errorf("Erro ao obter os pontos das linhas %q. Pontos: %v", linhas[i].Codigo, linhas[i].Pontos)
 			}
 		}
+	})
+
+	t.Run("GetTabelaLinha", func(t *testing.T) {
+		scheduler, _ := NewUrbsScheduler(s)
+
+		var wg sync.WaitGroup
+
+		errChan := make(chan error, 1)
+		dataChan := make(chan model.Tabela, 1)
+		defer close(errChan)
+		defer close(dataChan)
+		wg.Add(1)
+		go scheduler.getTabelaLinha(&wg, errChan, dataChan, "666")
+		wg.Wait()
+
+		select {
+		case <-errChan:
+			t.Errorf("Erro ao obter pontos de uma linha: %q", err)
+		case tabela := <-dataChan:
+			if len(tabela) != 134 {
+				t.Errorf("Erro ao contar os pontos da linha. Esperava-se %d, obteve-se %d", 134, len(tabela))
+			}
+		case <-time.After(5 * time.Second):
+			t.Errorf("Timeout")
+			return
+		}
+
+	})
+
+	t.Run("GetTabelaLinha com url errada", func(t *testing.T) {
+		scheduler, _ := NewUrbsScheduler(s)
+		scheduler.serviceURL = ""
+		var wg sync.WaitGroup
+
+		errChan := make(chan error, 1)
+		dataChan := make(chan model.Tabela, 1)
+		defer close(errChan)
+		defer close(dataChan)
+		wg.Add(1)
+		go scheduler.getTabelaLinha(&wg, errChan, dataChan, "666")
+		wg.Wait()
+
+		select {
+		case err := <-errChan:
+			if err == nil {
+				t.Error("Esperava-se um erro mas o retorno foi nil")
+			}
+		case tabela := <-dataChan:
+			if len(tabela) != 0 {
+				t.Errorf("Erro ao contar os pontos da linha. Esperava-se %d, obteve-se %d", 0, len(tabela))
+			}
+		case <-time.After(5 * time.Second):
+			t.Errorf("Timeout")
+			return
+		}
+
 	})
 
 }

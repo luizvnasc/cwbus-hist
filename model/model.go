@@ -38,3 +38,16 @@ type Ponto struct {
 
 // Pontos é um slice de Ponto
 type Pontos []Ponto
+
+// Parada representa um registro da tabela de horários da linha.
+type Parada struct {
+	Hora     string `json:"hora" bson:"hora"`     // Hora de parada
+	Ponto    string `json:"ponto" bson:"ponto"`   // Nome do ponto (UTF-8)
+	Dia      string `json:"dia" bson:"dia"`       // Tipo do Dia (1 - Dia Útil, 2 - Sábado, 3 - Domingo, 4 - Feriado)
+	Num      string `json:"num" bson:"num"`       // Número do ponto (de regulagem)
+	Tabela   string `json:"tabela" bson:"tabela"` // Número da tabela horária
+	Adaptado string `json:"adapt" bson:"adapt"`   // Informa se o ônibus tem algum tipo de adaptação para pessoas especiais
+}
+
+//Tabela representa um slice de todos os horários de parada de uma linha
+type Tabela []Parada
