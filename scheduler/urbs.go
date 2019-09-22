@@ -56,7 +56,10 @@ func (us *UrbsScheduler) getLinhas() {
 }
 
 // getPontosLinhas recebe como parâmetro uma lista de linhas e armazena seus respectivos pontos.
+// Esta função chama a função getPontos de forma concorrente e caso ocorra um erro ele ignora
+// os resultados corretos e não atualiza os pontos da linha.
 func (us *UrbsScheduler) getPontosLinhas(linhas model.Linhas) (model.Linhas, error) {
+
 	errChannels := make([]chan error, len(linhas))
 	dataChannels := make([]chan model.Pontos, len(linhas))
 
