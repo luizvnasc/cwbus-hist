@@ -23,7 +23,6 @@ func main() {
 	}
 	log.Println("Criando store")
 	s := store.NewMongoStore(ctx, client)
-	defer s.Disconnect()
 
 	log.Println("Iniciando Schedulers")
 	appScheduler := scheduler.NewAppScheduler()
