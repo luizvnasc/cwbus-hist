@@ -246,6 +246,20 @@ func TestGetTabelaLinha(t *testing.T) {
 	})
 }
 
+func TestGetVeiculos(t *testing.T) {
+	s := createStore(t)
+	t.Run("GetVeiculos caminho feliz", func(t *testing.T) {
+		scheduler, err := NewUrbsScheduler(s)
+		if err != nil {
+			t.Fatalf("Erro ao criar scheduler: %v", err)
+		}
+
+		scheduler.getVeiculos()
+		coll := scheduler.store.db.Collection("veiculos")
+		AssertNumberOfDocuments(context.Background(), t, coll, 1000)
+	})
+}
+
 func createStore(t *testing.T) store.Storer {
 	t.Helper()
 	ctx := context.Background()
