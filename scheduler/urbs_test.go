@@ -246,7 +246,7 @@ func TestGetTabelaLinha(t *testing.T) {
 	})
 }
 
-func TestGetVeiculos(t *testing.T) {
+func TestVeiculos(t *testing.T) {
 	s := createStore(t)
 	t.Run("GetVeiculos caminho feliz", func(t *testing.T) {
 		scheduler, err := NewUrbsScheduler(s)
@@ -255,8 +255,13 @@ func TestGetVeiculos(t *testing.T) {
 		}
 
 		scheduler.getVeiculos()
-		coll := scheduler.store.db.Collection("veiculos")
-		AssertNumberOfDocuments(context.Background(), t, coll, 1000)
+		veiculos, _ := s.Veiculos()
+
+		got := len(veiculos)
+		want := 0
+		if got > want {
+			t.Errorf("Erro ao contar veículos: Esperava-se mais que %d, obteve-se %d", want, got)
+		}
 	})
 }
 

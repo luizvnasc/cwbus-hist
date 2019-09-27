@@ -181,6 +181,33 @@ func (us *UrbsScheduler) getTabelaLinha(wg *sync.WaitGroup, errChan chan error, 
 	dataChan <- tabela
 }
 
+func (us *UrbsScheduler) getVeiculos() {
+	res, err := http.Get(fmt.Sprintf("%s/getVeiculos.php?c=%s", us.serviceURL, us.code))
+	if err != nil {
+		log.Printf("Erro ao obter Veículos: %q", err)
+		return
+	}
+
+	result, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		log.Printf("Erro ao ler body do serviço getVeículos: %q", err)
+		return
+	}
+	defer res.Body.Close()
+
+	var veiculos model.Veiculos
+	if err := json.Unmarshal(result, &veiculos); err != nil {
+		log.Printf("Erro ao converter json de veículos para map de veículos: %q", err)
+		return
+	}
+
+	if err := us.store.SaveVeiculos(veiculos); err != nil {
+		log.Printf("Erro ao salvar veículos no banco: %q", err)
+		return
+	}
+	return
+}
+
 // Execute inicia a execução dos jobs do scheduler
 func (us *UrbsScheduler) Execute() {
 	for _, job := range us.jobs {
