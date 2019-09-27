@@ -78,7 +78,7 @@ func TestVeiculos(t *testing.T) {
 		if err != nil {
 			t.Errorf("Erro ao obter os veiculos cadastradas: %q", err)
 		}
-		if len(veiculos) != 311 {
+		if len(veiculos) != 1 {
 			t.Errorf("Erro ao contar Veiculos. Esperava-se %d veiculos, obteve-se %d", 1, len(veiculos))
 		}
 	})
