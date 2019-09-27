@@ -58,11 +58,11 @@ func TestVeiculos(t *testing.T) {
 			Adaptado:    "1",
 			Tipo:        "1",
 			Tabela:      "2",
-			Situacao1:   "ATRASADO",
+			Situacao:    "ATRASADO",
 			Situacao2:   "TIPO INCOMPATIVEL",
 			Sent:        "VOLTA",
 			Tcount:      1,
-			Sentido:     "198-BAIRRO NOVO MUNDO (15:38)",
+			//Sentido:     "198-BAIRRO NOVO MUNDO (15:38)",
 		},
 	}
 

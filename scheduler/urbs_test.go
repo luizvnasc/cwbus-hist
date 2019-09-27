@@ -259,7 +259,7 @@ func TestVeiculos(t *testing.T) {
 
 		got := len(veiculos)
 		want := 0
-		if got > want {
+		if got <= want {
 			t.Errorf("Erro ao contar veículos: Esperava-se mais que %d, obteve-se %d", want, got)
 		}
 	})
