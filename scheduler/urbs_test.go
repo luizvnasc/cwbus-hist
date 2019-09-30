@@ -13,6 +13,7 @@ import (
 	"github.com/luizvnasc/cwbus-hist/db"
 	"github.com/luizvnasc/cwbus-hist/model"
 	"github.com/luizvnasc/cwbus-hist/store"
+	"github.com/luizvnasc/cwbus-hist/test"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -273,7 +274,7 @@ func createStore(t *testing.T) store.Storer {
 	// 	t.Fatalf("Erro ao criar client mongo: %v", err)
 	// }
 	// return store.NewMongoStore(ctx, client)
-	return &store.MockStore{}
+	return &test.MockStore{}
 }
 
 func AssertNumberOfDocuments(ctx context.Context, t *testing.T, coll *mongo.Collection, want int64) {

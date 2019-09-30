@@ -1,4 +1,4 @@
-package store
+package test
 
 import "github.com/luizvnasc/cwbus-hist/model"
 
