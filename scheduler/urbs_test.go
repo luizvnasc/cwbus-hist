@@ -13,6 +13,7 @@ import (
 	"github.com/luizvnasc/cwbus-hist/db"
 	"github.com/luizvnasc/cwbus-hist/model"
 	"github.com/luizvnasc/cwbus-hist/store"
+	"github.com/luizvnasc/cwbus-hist/test"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -246,14 +247,98 @@ func TestGetTabelaLinha(t *testing.T) {
 	})
 }
 
+func TestVeiculos(t *testing.T) {
+
+	t.Run("GetVeiculos caminho feliz", func(t *testing.T) {
+		s := createStore(t)
+		server := test.NewMockServer(test.GetVeiculosHandler)
+		defer server.Close()
+
+		scheduler, err := NewUrbsScheduler(s)
+		if err != nil {
+			t.Fatalf("Erro ao criar scheduler: %v", err)
+		}
+		scheduler.serviceURL = server.URL
+		scheduler.getVeiculos()
+		veiculos, _ := s.Veiculos()
+
+		got := len(veiculos)
+		want := 1663
+		if got != want {
+			t.Errorf("Erro ao contar veículos: Esperava-se %d, obteve-se %d", want, got)
+		}
+	})
+
+	t.Run("GetVeiculos resposta errada", func(t *testing.T) {
+		s := createStore(t)
+		server := test.NewMockServer(test.GetVeiculosWrongBodyHandler)
+		defer server.Close()
+
+		var buf bytes.Buffer
+		log.SetOutput(&buf)
+		defer func() {
+			log.SetOutput(os.Stderr)
+		}()
+
+		scheduler, err := NewUrbsScheduler(s)
+		if err != nil {
+			t.Fatalf("Erro ao criar scheduler: %v", err)
+		}
+		scheduler.serviceURL = server.URL
+		scheduler.getVeiculos()
+		veiculos, _ := s.Veiculos()
+
+		got := buf.String()
+		if !strings.Contains(got, "Erro ao converter json de veículos para map de veículos") {
+			t.Errorf("Erro ao obter veículos, Esperava-se um log de erro, obteve-se %q", got)
+		}
+
+		want := 0
+		if len(veiculos) != want {
+			t.Errorf("Erro ao contar veículos: Esperava-se %d, obteve-se %d", want, len(veiculos))
+		}
+	})
+
+	t.Run("GetVeiculos status 500", func(t *testing.T) {
+		s := createStore(t)
+		server := test.NewMockServer(test.GetVeiculosStatus500Handler)
+		defer server.Close()
+
+		var buf bytes.Buffer
+		log.SetOutput(&buf)
+		defer func() {
+			log.SetOutput(os.Stderr)
+		}()
+
+		scheduler, err := NewUrbsScheduler(s)
+		if err != nil {
+			t.Fatalf("Erro ao criar scheduler: %v", err)
+		}
+		scheduler.serviceURL = server.URL
+		scheduler.getVeiculos()
+		veiculos, _ := s.Veiculos()
+
+		got := buf.String()
+		if !strings.Contains(got, "Erro ao obter Veículos") {
+			t.Errorf("Erro ao obter veículos, Esperava-se um log de erro, obteve-se %q", got)
+		}
+
+		want := 0
+		if len(veiculos) != want {
+			t.Errorf("Erro ao contar veículos: Esperava-se %d, obteve-se %d", want, len(veiculos))
+		}
+	})
+}
+
 func createStore(t *testing.T) store.Storer {
 	t.Helper()
-	ctx := context.Background()
-	client, err := db.NewMongoClient(ctx, os.Getenv("CWBUS_DB_URL"))
-	if err != nil {
-		t.Fatalf("Erro ao criar client mongo: %v", err)
-	}
-	return store.NewMongoStore(ctx, client)
+	// ctx := context.Background()
+	// client, err := db.NewMongoClient(ctx, os.Getenv("CWBUS_DB_URL"))
+	// if err != nil {
+	// 	t.Fatalf("Erro ao criar client mongo: %v", err)
+	// }
+	// return store.NewMongoStore(ctx, client)
+	return &test.MockStore{}
 }
 
 func AssertNumberOfDocuments(ctx context.Context, t *testing.T, coll *mongo.Collection, want int64) {

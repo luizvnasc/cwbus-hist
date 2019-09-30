@@ -94,6 +94,43 @@ func (ms *MongoStore) Linhas() (linhas model.Linhas, err error) {
 	return
 }
 
+// SaveVeiculos carrega a coleção veiculos com uma lista de veiculos.
+func (ms *MongoStore) SaveVeiculos(veiculos map[string]model.Veiculo) error {
+	var operations []mongo.WriteModel
+	coll := ms.db.Collection("veiculos")
+
+	// Limpa a base para a adicionar as novas situações dos veículos.
+	coll.DeleteMany(ms.ctx, bson.M{})
+
+	for _, veiculo := range veiculos {
+		operation := mongo.NewInsertOneModel()
+		operation.SetDocument(veiculo)
+		operations = append(operations, operation)
+	}
+
+	_, err := coll.BulkWrite(ms.ctx, operations)
+
+	return err
+}
+
+// Veiculos lista os veiculos da coleção veiculos.
+func (ms *MongoStore) Veiculos() (veiculos model.Veiculos, err error) {
+	cur, err := ms.db.Collection("veiculos").Find(ms.ctx, bson.D{})
+	if err != nil {
+		return
+	}
+	for cur.Next(ms.ctx) {
+		var veiculo model.Veiculo
+		err = cur.Decode(&veiculo)
+		if err != nil {
+			veiculos = []model.Veiculo{}
+			return
+		}
+		veiculos = append(veiculos, veiculo)
+	}
+	return
+}
+
 // Disconnect desconecta a store do banco
 func (ms *MongoStore) Disconnect() {
 	ms.client.Disconnect(ms.ctx)

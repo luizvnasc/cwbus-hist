@@ -52,3 +52,23 @@ type Parada struct {
 
 //Tabela representa um slice de todos os horários de parada de uma linha
 type Tabela []Parada
+
+// Veiculo representa um veículo da urbs em circulação.
+type Veiculo struct {
+	Codigo      string `json:"cod" bson:"cod"`                 // Prefixo do veículo
+	Refresh     string `json:"refresh" bson:"refresh"`         // Hora da Atualização (HH24:MI)
+	Latitude    string `json:"lat" bson:"lat"`                 // Latitude (ponto flutuante)
+	Longitude   string `json:"lon" bson:"lon"`                 // Longitude (ponto flutuante)
+	CodigoLinha string `json:"codigolinha" bson:"codigolinha"` // Prefixo da Linha (3 caracteres)
+	Adaptado    string `json:"adapt" bson:"adapt"`             // Adaptado para cadeirantes (1 para sim, 0 para não)
+	Tipo        string `json:"tipo_veic" bson:"tipo_veic"`     // Tipo do ônibus {1:'COMUM',2:'SEMI PADRON', 3 :'PADRON',4 :'ARTICULADO',5 :'BIARTICULADO',6 :'MICRO', 7 :'MICRO ESPECIAL',8 :'BIARTIC. BIO',9 :'ARTIC. BIO',10:'HIBRIDO',11:'HIBRIDO BIO',12:'ELÉTRICO}'}
+	Tabela      string `json:"tabela" bson:"tabela"`           // Tabela que o veículo está executando
+	Situacao    string `json:"situacao" bson:"situacao"`       // Situação processada do veículo
+	Situacao2   string `json:"situacao2" bson:"situacao2"`     // Situação processada do veículo
+	Tcount      int    `json:"tcount" bson:"tcount"`           // Contador de ciclos sem atulizar informação do veículo (informação atualizada 1)
+	Sent        string `json:"sent" bson:"sent"`               // Direção do  veículo
+	//Sentido     string `json:"sentido" bson:"sentido"`         // Sentido da linha do veículo
+}
+
+// Veiculos é um slice com os ônibus da urbs
+type Veiculos []Veiculo
