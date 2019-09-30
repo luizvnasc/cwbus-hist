@@ -70,5 +70,5 @@ type Veiculo struct {
 	//Sentido     string `json:"sentido" bson:"sentido"`         // Sentido da linha do veículo
 }
 
-// Veiculos é um map com os ônibus da urbs
-type Veiculos map[string]Veiculo
+// Veiculos é um slice com os ônibus da urbs
+type Veiculos []Veiculo

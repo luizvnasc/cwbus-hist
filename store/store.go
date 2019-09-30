@@ -10,7 +10,7 @@ type Storer interface {
 	// Recupera as linhas dos bancos de dados
 	Linhas() (model.Linhas, error)
 	// Salva os veiculos no banco
-	SaveVeiculos(veiculos model.Veiculos) error
+	SaveVeiculos(veiculos map[string]model.Veiculo) error
 	// Lista os veiculos do banco
-	Veiculos() ([]model.Veiculo, error)
+	Veiculos() (model.Veiculos, error)
 }

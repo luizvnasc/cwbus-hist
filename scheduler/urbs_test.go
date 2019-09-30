@@ -267,12 +267,13 @@ func TestVeiculos(t *testing.T) {
 
 func createStore(t *testing.T) store.Storer {
 	t.Helper()
-	ctx := context.Background()
-	client, err := db.NewMongoClient(ctx, os.Getenv("CWBUS_DB_URL"))
-	if err != nil {
-		t.Fatalf("Erro ao criar client mongo: %v", err)
-	}
-	return store.NewMongoStore(ctx, client)
+	// ctx := context.Background()
+	// client, err := db.NewMongoClient(ctx, os.Getenv("CWBUS_DB_URL"))
+	// if err != nil {
+	// 	t.Fatalf("Erro ao criar client mongo: %v", err)
+	// }
+	// return store.NewMongoStore(ctx, client)
+	return &store.MockStore{}
 }
 
 func AssertNumberOfDocuments(ctx context.Context, t *testing.T, coll *mongo.Collection, want int64) {

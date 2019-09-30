@@ -195,7 +195,7 @@ func (us *UrbsScheduler) getVeiculos() {
 	}
 	defer res.Body.Close()
 
-	var veiculos model.Veiculos
+	var veiculos map[string]model.Veiculo
 	if err := json.Unmarshal(result, &veiculos); err != nil {
 		log.Printf("Erro ao converter json de veículos para map de veículos: %q", err)
 		return

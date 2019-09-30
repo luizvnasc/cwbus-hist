@@ -48,7 +48,7 @@ func TestVeiculos(t *testing.T) {
 	client := createMongoClient(ctx, t)
 	store := NewMongoStore(ctx, client)
 
-	veiculos := model.Veiculos{
+	veiculos := map[string]model.Veiculo{
 		"GC295": model.Veiculo{
 			Codigo:      "GC295",
 			Refresh:     "15:05",

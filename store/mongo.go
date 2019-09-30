@@ -95,7 +95,7 @@ func (ms *MongoStore) Linhas() (linhas model.Linhas, err error) {
 }
 
 // SaveVeiculos carrega a coleção veiculos com uma lista de veiculos.
-func (ms *MongoStore) SaveVeiculos(veiculos model.Veiculos) error {
+func (ms *MongoStore) SaveVeiculos(veiculos map[string]model.Veiculo) error {
 	var operations []mongo.WriteModel
 	coll := ms.db.Collection("veiculos")
 
@@ -114,7 +114,7 @@ func (ms *MongoStore) SaveVeiculos(veiculos model.Veiculos) error {
 }
 
 // Veiculos lista os veiculos da coleção veiculos.
-func (ms *MongoStore) Veiculos() (veiculos []model.Veiculo, err error) {
+func (ms *MongoStore) Veiculos() (veiculos model.Veiculos, err error) {
 	cur, err := ms.db.Collection("veiculos").Find(ms.ctx, bson.D{})
 	if err != nil {
 		return
