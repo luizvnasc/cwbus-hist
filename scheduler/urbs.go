@@ -237,5 +237,6 @@ func NewUrbsScheduler(store store.Storer) (*UrbsScheduler, error) {
 		serviceURL: serviceURL,
 	}
 	scheduler.jobs = append(scheduler.jobs, NewJob("0 5 * * *", scheduler.getLinhas))
+	scheduler.jobs = append(scheduler.jobs, NewJob("*/2 * * * *", scheduler.getVeiculos))
 	return scheduler, nil
 }
