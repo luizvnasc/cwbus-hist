@@ -248,20 +248,54 @@ func TestGetTabelaLinha(t *testing.T) {
 }
 
 func TestVeiculos(t *testing.T) {
-	s := createStore(t)
+
 	t.Run("GetVeiculos caminho feliz", func(t *testing.T) {
+		s := createStore(t)
+		server := test.NewMockServer(test.GetVeiculosHandler)
+		defer server.Close()
+
 		scheduler, err := NewUrbsScheduler(s)
 		if err != nil {
 			t.Fatalf("Erro ao criar scheduler: %v", err)
 		}
-
+		scheduler.serviceURL = server.URL
 		scheduler.getVeiculos()
 		veiculos, _ := s.Veiculos()
 
 		got := len(veiculos)
+		want := 1663
+		if got != want {
+			t.Errorf("Erro ao contar veículos: Esperava-se %d, obteve-se %d", want, got)
+		}
+	})
+
+	t.Run("GetVeiculos resposta errada", func(t *testing.T) {
+		s := createStore(t)
+		server := test.NewMockServer(test.GetVeiculosWrongBodyHandler)
+		defer server.Close()
+
+		var buf bytes.Buffer
+		log.SetOutput(&buf)
+		defer func() {
+			log.SetOutput(os.Stderr)
+		}()
+
+		scheduler, err := NewUrbsScheduler(s)
+		if err != nil {
+			t.Fatalf("Erro ao criar scheduler: %v", err)
+		}
+		scheduler.serviceURL = server.URL
+		scheduler.getVeiculos()
+		veiculos, _ := s.Veiculos()
+
+		got := buf.String()
+		if !strings.Contains(got, "Erro ao converter json de veículos para map de veículos") {
+			t.Errorf("Erro ao obter veículos, Esperava-se um log de erro, obteve-se %q", got)
+		}
+
 		want := 0
-		if got <= want {
-			t.Errorf("Erro ao contar veículos: Esperava-se mais que %d, obteve-se %d", want, got)
+		if len(veiculos) != want {
+			t.Errorf("Erro ao contar veículos: Esperava-se %d, obteve-se %d", want, len(veiculos))
 		}
 	})
 }
