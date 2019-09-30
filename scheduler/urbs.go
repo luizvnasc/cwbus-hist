@@ -183,7 +183,7 @@ func (us *UrbsScheduler) getTabelaLinha(wg *sync.WaitGroup, errChan chan error, 
 
 func (us *UrbsScheduler) getVeiculos() {
 	res, err := http.Get(fmt.Sprintf("%s/getVeiculos.php?c=%s", us.serviceURL, us.code))
-	if err != nil {
+	if err != nil || res.StatusCode != 200 {
 		log.Printf("Erro ao obter Veículos: %q", err)
 		return
 	}

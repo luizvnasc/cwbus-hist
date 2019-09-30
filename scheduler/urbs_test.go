@@ -298,6 +298,36 @@ func TestVeiculos(t *testing.T) {
 			t.Errorf("Erro ao contar veículos: Esperava-se %d, obteve-se %d", want, len(veiculos))
 		}
 	})
+
+	t.Run("GetVeiculos status 500", func(t *testing.T) {
+		s := createStore(t)
+		server := test.NewMockServer(test.GetVeiculosStatus500Handler)
+		defer server.Close()
+
+		var buf bytes.Buffer
+		log.SetOutput(&buf)
+		defer func() {
+			log.SetOutput(os.Stderr)
+		}()
+
+		scheduler, err := NewUrbsScheduler(s)
+		if err != nil {
+			t.Fatalf("Erro ao criar scheduler: %v", err)
+		}
+		scheduler.serviceURL = server.URL
+		scheduler.getVeiculos()
+		veiculos, _ := s.Veiculos()
+
+		got := buf.String()
+		if !strings.Contains(got, "Erro ao obter Veículos") {
+			t.Errorf("Erro ao obter veículos, Esperava-se um log de erro, obteve-se %q", got)
+		}
+
+		want := 0
+		if len(veiculos) != want {
+			t.Errorf("Erro ao contar veículos: Esperava-se %d, obteve-se %d", want, len(veiculos))
+		}
+	})
 }
 
 func createStore(t *testing.T) store.Storer {

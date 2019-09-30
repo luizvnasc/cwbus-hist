@@ -30,3 +30,8 @@ func GetVeiculosHandler(w http.ResponseWriter, r *http.Request) {
 func GetVeiculosWrongBodyHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("teste"))
 }
+
+// GetVeiculosStatus500Handler simula um status 500 do serviços getVeiculos
+func GetVeiculosStatus500Handler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusInternalServerError)
+}
