@@ -6,11 +6,13 @@ import (
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/luizvnasc/cwbus-hist/config"
 )
 
 func TestAppScheduler(t *testing.T) {
 	t.Run("Cria um scheduler da aplicação", func(t *testing.T) {
-		s := NewAppScheduler()
+		s := NewAppScheduler(config.WakeUpURL())
 		if s == nil {
 			t.Errorf("Scheduler não foi criado.")
 		}
@@ -22,7 +24,7 @@ func TestAppScheduler(t *testing.T) {
 		defer func() {
 			log.SetOutput(os.Stderr)
 		}()
-		s := NewAppScheduler()
+		s := NewAppScheduler("teste")
 		s.wakeUpDyno()
 		got := buf.String()
 		if !strings.Contains(got, "Erro ao acordar o dyno:") {
@@ -38,9 +40,7 @@ func TestAppScheduler(t *testing.T) {
 			log.SetOutput(os.Stderr)
 		}()
 
-		os.Setenv("CWBUS_WAKEUP_URL", "https://httpstat.us/400")
-
-		s := NewAppScheduler()
+		s := NewAppScheduler("https://httpstat.us/400")
 		s.wakeUpDyno()
 		got := buf.String()
 		if !strings.Contains(got, "Erro ao acordar o dyno, Status:") {
@@ -55,10 +55,7 @@ func TestAppScheduler(t *testing.T) {
 		defer func() {
 			log.SetOutput(os.Stderr)
 		}()
-
-		os.Setenv("CWBUS_WAKEUP_URL", "https://httpstat.us/200")
-
-		s := NewAppScheduler()
+		s := NewAppScheduler("https://httpstat.us/200")
 		s.wakeUpDyno()
 		got := buf.String()
 		if !strings.Contains(got, "Trabalho...") {
