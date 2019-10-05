@@ -40,6 +40,7 @@ func DBName() string {
 	return getValue(dbName)
 }
 
+// WakeUpURL retorna a url utilizada para acordar o dyno do heroku
 func WakeUpURL() string {
 	return getValue(wakeUpURL)
 }
