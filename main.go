@@ -23,10 +23,10 @@ func main() {
 		os.Exit(1)
 	}
 	log.Println("Criando store")
-	s := store.NewMongoStore(ctx, client)
+	s := store.NewMongoStore(ctx, client, config.DBName())
 
 	log.Println("Iniciando Schedulers")
-	appScheduler := scheduler.NewAppScheduler()
+	appScheduler := scheduler.NewAppScheduler(config.WakeUpURL())
 	urbsScheduler, err := scheduler.NewUrbsScheduler(s)
 	if err != nil {
 		log.Fatalf("Erro ao iniciar o schduler da urbs")
