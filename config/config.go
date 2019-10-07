@@ -12,35 +12,47 @@ const (
 	wakeUpURL  = "WAKEUP_URL"
 )
 
-func key(name string) string {
+// Configurer é a interface que define um configurador no sistema.
+type Configurer interface {
+	ServiceURL() string
+	UrbsCode() string
+	DBName() string
+	DBStrConn() string
+	WakeUpURL() string
+}
+
+// EnvConfigurer é um confiurador que  capitura as configurações das variáveis de ambiente.
+type EnvConfigurer struct{}
+
+func (ec EnvConfigurer) key(name string) string {
 	return prefix + name
 }
 
-func getValue(name string) string {
-	return os.Getenv(key(name))
+func (ec EnvConfigurer) getValue(name string) string {
+	return os.Getenv(ec.key(name))
 }
 
 // ServiceURL retorna a URL dos serviços da urbs.
-func ServiceURL() string {
-	return getValue(serviceURL)
+func (ec EnvConfigurer) ServiceURL() string {
+	return ec.getValue(serviceURL)
 }
 
 // UrbsCode retorna o código urbs de acesso aos serviços.
-func UrbsCode() string {
-	return getValue(urbsCode)
+func (ec EnvConfigurer) UrbsCode() string {
+	return ec.getValue(urbsCode)
 }
 
 // DBStrConn retorna a string de conexão do banco de dados.
-func DBStrConn() string {
-	return getValue(dbStrConn)
+func (ec EnvConfigurer) DBStrConn() string {
+	return ec.getValue(dbStrConn)
 }
 
 // DBName retorna o nome do banco de dados.
-func DBName() string {
-	return getValue(dbName)
+func (ec EnvConfigurer) DBName() string {
+	return ec.getValue(dbName)
 }
 
 // WakeUpURL retorna a url utilizada para acordar o dyno do heroku
-func WakeUpURL() string {
-	return getValue(wakeUpURL)
+func (ec EnvConfigurer) WakeUpURL() string {
+	return ec.getValue(wakeUpURL)
 }
