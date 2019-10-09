@@ -8,11 +8,14 @@ import (
 	"testing"
 
 	"github.com/luizvnasc/cwbus-hist/config"
+	"github.com/luizvnasc/cwbus-hist/test"
 )
 
 func TestAppScheduler(t *testing.T) {
+	config := &config.EnvConfigurer{}
+	mockConfig := &test.MockConfigurer{}
 	t.Run("Cria um scheduler da aplicação", func(t *testing.T) {
-		s := NewAppScheduler(config.WakeUpURL())
+		s := NewAppScheduler(config)
 		if s == nil {
 			t.Errorf("Scheduler não foi criado.")
 		}
@@ -24,7 +27,8 @@ func TestAppScheduler(t *testing.T) {
 		defer func() {
 			log.SetOutput(os.Stderr)
 		}()
-		s := NewAppScheduler("teste")
+		mockConfig.SetWakeUpURL("teste")
+		s := NewAppScheduler(mockConfig)
 		s.wakeUpDyno()
 		got := buf.String()
 		if !strings.Contains(got, "Erro ao acordar o dyno:") {
@@ -40,9 +44,11 @@ func TestAppScheduler(t *testing.T) {
 			log.SetOutput(os.Stderr)
 		}()
 
-		s := NewAppScheduler("https://httpstat.us/400")
+		mockConfig.SetWakeUpURL("https://httpstat.us/400")
+		s := NewAppScheduler(mockConfig)
 		s.wakeUpDyno()
 		got := buf.String()
+
 		if !strings.Contains(got, "Erro ao acordar o dyno, Status:") {
 			t.Errorf("Erro ao validar status na task wakeup.")
 		}
@@ -55,7 +61,8 @@ func TestAppScheduler(t *testing.T) {
 		defer func() {
 			log.SetOutput(os.Stderr)
 		}()
-		s := NewAppScheduler("https://httpstat.us/200")
+		mockConfig.SetWakeUpURL("https://httpstat.us/200")
+		s := NewAppScheduler(mockConfig)
 		s.wakeUpDyno()
 		got := buf.String()
 		if !strings.Contains(got, "Trabalho...") {

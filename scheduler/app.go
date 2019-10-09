@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/luizvnasc/cwbus-hist/config"
 	"github.com/robfig/cron/v3"
 )
 
@@ -43,9 +44,9 @@ func (as *AppScheduler) Terminate() {
 }
 
 // NewAppScheduler é um construtor de um AppScheduler
-func NewAppScheduler(wakeUpUrl string) *AppScheduler {
+func NewAppScheduler(config config.Configurer) *AppScheduler {
 	c := cron.New()
-	appScheduler := &AppScheduler{cron: c, wakeUpUrl: wakeUpUrl}
+	appScheduler := &AppScheduler{cron: c, wakeUpUrl: config.WakeUpURL()}
 	appScheduler.jobs = append(appScheduler.jobs, NewJob("*/3 * * * *", appScheduler.wakeUpDyno))
 	return appScheduler
 }
