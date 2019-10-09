@@ -12,9 +12,10 @@ import (
 )
 
 func TestLinhas(t *testing.T) {
+	config := &config.EnvConfigurer{}
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	client := createMongoClient(ctx, t)
-	store := NewMongoStore(ctx, client, config.DBName())
+	client := createMongoClient(ctx, t, config)
+	store := NewMongoStore(ctx, client, config)
 
 	var linhas = model.Linhas{
 		model.Linha{
@@ -44,9 +45,10 @@ func TestLinhas(t *testing.T) {
 }
 
 func TestVeiculos(t *testing.T) {
+	config := &config.EnvConfigurer{}
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	client := createMongoClient(ctx, t)
-	store := NewMongoStore(ctx, client, config.DBName())
+	client := createMongoClient(ctx, t, config)
+	store := NewMongoStore(ctx, client, config)
 
 	veiculos := map[string]model.Veiculo{
 		"GC295": model.Veiculo{
@@ -85,7 +87,7 @@ func TestVeiculos(t *testing.T) {
 }
 
 // Helper que cria uma conexão com a base de dados.
-func createMongoClient(ctx context.Context, t *testing.T) *mongo.Client {
+func createMongoClient(ctx context.Context, t *testing.T, config config.Configurer) *mongo.Client {
 	t.Helper()
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(config.DBStrConn()))
 	if err != nil {
