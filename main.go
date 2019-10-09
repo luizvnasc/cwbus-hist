@@ -15,6 +15,7 @@ import (
 )
 
 func main() {
+	config := &config.EnvConfigurer{}
 	log.Println("Criando cliente mongodb")
 	ctx := context.Background()
 	client, err := db.NewMongoClient(ctx, config.DBStrConn())
@@ -23,10 +24,10 @@ func main() {
 		os.Exit(1)
 	}
 	log.Println("Criando store")
-	s := store.NewMongoStore(ctx, client, config.DBName())
+	s := store.NewMongoStore(ctx, client, config)
 
 	log.Println("Iniciando Schedulers")
-	appScheduler := scheduler.NewAppScheduler(config.WakeUpURL())
+	appScheduler := scheduler.NewAppScheduler(config)
 	urbsScheduler, err := scheduler.NewUrbsScheduler(s)
 	if err != nil {
 		log.Fatalf("Erro ao iniciar o schduler da urbs")
