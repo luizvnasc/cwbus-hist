@@ -2,7 +2,10 @@ package scheduler
 
 import (
 	"bytes"
+	"fmt"
 	"log"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"strings"
 	"testing"
@@ -21,52 +24,35 @@ func TestAppScheduler(t *testing.T) {
 		}
 	})
 
-	t.Run("Teste acordar dyno com erro de url", func(t *testing.T) {
-		var buf bytes.Buffer
-		log.SetOutput(&buf)
-		defer func() {
-			log.SetOutput(os.Stderr)
-		}()
-		mockConfig.SetWakeUpURL("teste")
-		s := NewAppScheduler(mockConfig)
-		s.wakeUpDyno()
-		got := buf.String()
-		if !strings.Contains(got, "Erro ao acordar o dyno:") {
-			t.Errorf("Erro ao validar url na task wakeup.")
-		}
-	})
+	cases := []struct {
+		status int
+		want   string
+	}{
+		{http.StatusNotFound, "Erro ao acordar o dyno:"},
+		{http.StatusBadRequest, "Erro ao acordar o dyno, Status:"},
+		{http.StatusOK, "Trabalho..."},
+	}
+	for _, test := range cases {
+		t.Run(fmt.Sprintf("Teste ao acordar dyno retornando status: %d", test.status), func(t *testing.T) {
 
-	t.Run("Teste acordar dyno com erro de statuscode", func(t *testing.T) {
-		var buf bytes.Buffer
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(test.status)
+			}))
+			// Close the server when test finishes
+			defer server.Close()
 
-		log.SetOutput(&buf)
-		defer func() {
-			log.SetOutput(os.Stderr)
-		}()
-
-		mockConfig.SetWakeUpURL("https://httpstat.us/400")
-		s := NewAppScheduler(mockConfig)
-		s.wakeUpDyno()
-		got := buf.String()
-
-		if !strings.Contains(got, "Erro ao acordar o dyno, Status:") {
-			t.Errorf("Erro ao validar status na task wakeup.")
-		}
-	})
-
-	t.Run("Teste acordar dyno", func(t *testing.T) {
-		var buf bytes.Buffer
-
-		log.SetOutput(&buf)
-		defer func() {
-			log.SetOutput(os.Stderr)
-		}()
-		mockConfig.SetWakeUpURL("https://httpstat.us/200")
-		s := NewAppScheduler(mockConfig)
-		s.wakeUpDyno()
-		got := buf.String()
-		if !strings.Contains(got, "Trabalho...") {
-			t.Errorf("Erro ao validar status na task wakeup.")
-		}
-	})
+			var buf bytes.Buffer
+			log.SetOutput(&buf)
+			defer func() {
+				log.SetOutput(os.Stderr)
+			}()
+			mockConfig.SetWakeUpURL(server.URL)
+			s := NewAppScheduler(mockConfig)
+			s.wakeUpDyno()
+			got := buf.String()
+			if !strings.Contains(got, test.want) {
+				t.Errorf("Erro ao validar url na task wakeup. Log deveria conter %q mas retornou %q", test.want, got)
+			}
+		})
+	}
 }
