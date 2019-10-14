@@ -28,7 +28,7 @@ func TestAppScheduler(t *testing.T) {
 		status int
 		want   string
 	}{
-		{http.StatusNotFound, "Erro ao acordar o dyno:"},
+		{0, "Erro ao acordar o dyno:"},
 		{http.StatusBadRequest, "Erro ao acordar o dyno, Status:"},
 		{http.StatusOK, "Trabalho..."},
 	}
@@ -46,7 +46,9 @@ func TestAppScheduler(t *testing.T) {
 			defer func() {
 				log.SetOutput(os.Stderr)
 			}()
+
 			mockConfig.SetWakeUpURL(server.URL)
+
 			s := NewAppScheduler(mockConfig)
 			s.wakeUpDyno()
 			got := buf.String()

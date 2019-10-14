@@ -12,11 +12,11 @@ import (
 type AppScheduler struct {
 	cron      *cron.Cron
 	jobs      Jobs
-	wakeUpUrl string
+	wakeUpURL string
 }
 
 func (as *AppScheduler) wakeUpDyno() {
-	res, err := http.Get(as.wakeUpUrl)
+	res, err := http.Get(as.wakeUpURL)
 	if err != nil {
 		log.Printf("Erro ao acordar o dyno: %q", err)
 		return
@@ -46,7 +46,7 @@ func (as *AppScheduler) Terminate() {
 // NewAppScheduler é um construtor de um AppScheduler
 func NewAppScheduler(config config.Configurer) *AppScheduler {
 	c := cron.New()
-	appScheduler := &AppScheduler{cron: c, wakeUpUrl: config.WakeUpURL()}
+	appScheduler := &AppScheduler{cron: c, wakeUpURL: config.WakeUpURL()}
 	appScheduler.jobs = append(appScheduler.jobs, NewJob("*/3 * * * *", appScheduler.wakeUpDyno))
 	return appScheduler
 }

@@ -10,7 +10,7 @@ type MockConfigurer struct {
 }
 
 // SetServiceURL é o setter do serviceURL
-func (mc MockConfigurer) SetServiceURL(url string) {
+func (mc *MockConfigurer) SetServiceURL(url string) {
 	mc.serviceURL = url
 }
 
@@ -20,7 +20,7 @@ func (mc MockConfigurer) ServiceURL() string {
 }
 
 // SetUrbsCode é o setter do urbsCode
-func (mc MockConfigurer) SetUrbsCode(code string) {
+func (mc *MockConfigurer) SetUrbsCode(code string) {
 	mc.urbsCode = code
 }
 
@@ -30,7 +30,7 @@ func (mc MockConfigurer) UrbsCode() string {
 }
 
 // SetDBName é o setter do dbName
-func (mc MockConfigurer) SetDBName(name string) {
+func (mc *MockConfigurer) SetDBName(name string) {
 	mc.dbName = name
 }
 
@@ -40,7 +40,7 @@ func (mc MockConfigurer) DBName() string {
 }
 
 // SetDBStrConn é o setter do dbStrConn
-func (mc MockConfigurer) SetDBStrConn(str string) {
+func (mc *MockConfigurer) SetDBStrConn(str string) {
 	mc.dbStrConn = str
 }
 
@@ -50,7 +50,7 @@ func (mc MockConfigurer) DBStrConn() string {
 }
 
 // SetWakeUpURL é o setter do wakeupURL
-func (mc MockConfigurer) SetWakeUpURL(url string) {
+func (mc *MockConfigurer) SetWakeUpURL(url string) {
 	mc.wakeUpURL = url
 }
 
