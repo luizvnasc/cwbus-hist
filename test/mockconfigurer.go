@@ -1,5 +1,7 @@
 package test
 
+import "github.com/luizvnasc/cwbus-hist/config"
+
 // MockConfigurer é um confgiurer para ser utilizado em testes.
 type MockConfigurer struct {
 	serviceURL string
@@ -57,4 +59,15 @@ func (mc *MockConfigurer) SetWakeUpURL(url string) {
 // WakeUpURL getter
 func (mc MockConfigurer) WakeUpURL() string {
 	return mc.wakeUpURL
+}
+
+// ConfigToMock cria um MockConfigurer a partir de um Configurer
+func ConfigToMock(c config.Configurer) MockConfigurer {
+	return MockConfigurer{
+		serviceURL: c.ServiceURL(),
+		urbsCode:   c.UrbsCode(),
+		dbName:     c.DBName(),
+		dbStrConn:  c.DBStrConn(),
+		wakeUpURL:  c.WakeUpURL(),
+	}
 }

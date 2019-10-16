@@ -6,10 +6,10 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"sync"
 	"time"
 
+	"github.com/luizvnasc/cwbus-hist/config"
 	"github.com/luizvnasc/cwbus-hist/model"
 	"github.com/luizvnasc/cwbus-hist/store"
 	"github.com/robfig/cron/v3"
@@ -222,19 +222,18 @@ func (us *UrbsScheduler) Terminate() {
 }
 
 // NewUrbsScheduler é um construtor da estrutura UrbsScheduler
-func NewUrbsScheduler(store store.Storer) (*UrbsScheduler, error) {
-	code := os.Getenv("CWBUS_URBS_CODE")
-	serviceURL := os.Getenv("CWBUS_URBS_SERVICE_URL")
-	if len(code) == 0 {
+func NewUrbsScheduler(store store.Storer, config config.Configurer) (*UrbsScheduler, error) {
+
+	if len(config.UrbsCode()) == 0 {
 		return nil, ErrNoUrbsCode
 	}
-	if len(serviceURL) == 0 {
+	if len(config.ServiceURL()) == 0 {
 		return nil, ErrNoServiceURL
 	}
 	scheduler := &UrbsScheduler{cron: cron.New(),
 		store:      store,
-		code:       code,
-		serviceURL: serviceURL,
+		code:       config.UrbsCode(),
+		serviceURL: config.ServiceURL(),
 	}
 	scheduler.jobs = append(scheduler.jobs, NewJob("0 5 * * *", scheduler.getLinhas))
 	scheduler.jobs = append(scheduler.jobs, NewJob("*/2 * * * *", scheduler.getVeiculos))
