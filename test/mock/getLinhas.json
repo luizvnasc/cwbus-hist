@@ -1,0 +1,23 @@
+[
+    {
+        "COD": "464",
+        "NOME": "A. MUNHOZ \/ J. BOT\u00c2NICO",
+        "SOMENTE_CARTAO": "S",
+        "CATEGORIA_SERVICO": "CONVENCIONAL",
+        "NOME_COR": "AMARELA"
+    },
+    {
+        "COD": "226",
+        "NOME": "ABAET\u00c9",
+        "SOMENTE_CARTAO": "N",
+        "CATEGORIA_SERVICO": "ALIMENTADOR",
+        "NOME_COR": "LARANJA"
+    },
+    {
+        "COD": "182",
+        "NOME": "ABRANCHES",
+        "SOMENTE_CARTAO": "N",
+        "CATEGORIA_SERVICO": "TRONCAL",
+        "NOME_COR": "AMARELA"
+    }
+]

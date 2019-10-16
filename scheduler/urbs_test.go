@@ -10,19 +10,22 @@ import (
 	"testing"
 	"time"
 
+	"github.com/luizvnasc/cwbus-hist/config"
 	"github.com/luizvnasc/cwbus-hist/db"
 	"github.com/luizvnasc/cwbus-hist/model"
 	"github.com/luizvnasc/cwbus-hist/store"
-	"github.com/luizvnasc/cwbus-hist/test"
+	"github.com/luizvnasc/cwbus-hist/test/mock"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func TestUrbsScheduler(t *testing.T) {
 	s := createStore(t)
+	c := config.EnvConfigurer{}
+
 	t.Run("Criar Urbs Scheduler", func(t *testing.T) {
 
-		scheduler, err := NewUrbsScheduler(s)
+		scheduler, err := NewUrbsScheduler(s, c)
 
 		if err != nil {
 			t.Errorf("Erro ao criar scheduler de jobs da urbs: %v", err)
@@ -32,46 +35,45 @@ func TestUrbsScheduler(t *testing.T) {
 		}
 	})
 	t.Run("Criar Urbs Scheduler sem informar sem código urbs", func(t *testing.T) {
-		code := os.Getenv("CWBUS_URBS_CODE")
-		os.Setenv("CWBUS_URBS_CODE", "")
-		_, err := NewUrbsScheduler(s)
+		mc := mock.ConfigToMock(c)
+		mc.SetUrbsCode("")
+		_, err := NewUrbsScheduler(s, mc)
 
 		if err != ErrNoUrbsCode {
 			t.Errorf("Erro ao criar scheduler de jobs da urbs: Esperava-se %q, obteve-se %v", ErrNoUrbsCode, err)
 		}
-		os.Setenv("CWBUS_URBS_CODE", code)
 
 	})
 	t.Run("Criar Urbs Scheduler sem informar sem url de serviços da urbs", func(t *testing.T) {
-		url := os.Getenv("CWBUS_URBS_SERVICE_URL")
-		os.Setenv("CWBUS_URBS_SERVICE_URL", "")
-		_, err := NewUrbsScheduler(s)
+		mc := mock.ConfigToMock(c)
+		mc.SetServiceURL("")
+		_, err := NewUrbsScheduler(s, mc)
 
 		if err != ErrNoServiceURL {
 			t.Errorf("Erro ao criar scheduler de jobs da urbs: Esperava-se %q, obteve-se %v", ErrNoServiceURL, err)
 		}
-		os.Setenv("CWBUS_URBS_SERVICE_URL", url)
+
 	})
 
 }
 
 func TestGetLinhas(t *testing.T) {
 	s := createStore(t)
-
+	c := config.EnvConfigurer{}
 	t.Run("getLinhas Task Caminho feliz", func(t *testing.T) {
 		ctx := context.Background()
-		client, _ := db.NewMongoClient(ctx, os.Getenv("CWBUS_DB_URL"))
-		scheduler, err := NewUrbsScheduler(s)
+		client, _ := db.NewMongoClient(ctx, c.DBStrConn())
+		scheduler, err := NewUrbsScheduler(s, c)
 		if err != nil {
 			t.Fatalf("Erro ao criar scheduler: %q", err)
 		}
 		scheduler.getLinhas()
-		linhas := client.Database(os.Getenv("CWBUS_DB_HIST")).Collection("linhas")
+		linhas := client.Database(c.DBName()).Collection("linhas")
 		AssertNumberOfDocuments(ctx, t, linhas, 311)
 	})
 
 	t.Run("getLinhas com url de serviço errada", func(t *testing.T) {
-		scheduler, _ := NewUrbsScheduler(s)
+		scheduler, _ := NewUrbsScheduler(s, c)
 		scheduler.serviceURL = ""
 
 		var buf bytes.Buffer
@@ -88,8 +90,9 @@ func TestGetLinhas(t *testing.T) {
 
 func TestGetPontos(t *testing.T) {
 	s := createStore(t)
+	c := config.EnvConfigurer{}
 	t.Run("getPontos Task Caminho feliz", func(t *testing.T) {
-		scheduler, err := NewUrbsScheduler(s)
+		scheduler, err := NewUrbsScheduler(s, c)
 
 		if err != nil {
 			t.Fatalf("Erro ao criar scheduler: %q", err)
@@ -117,7 +120,7 @@ func TestGetPontos(t *testing.T) {
 	})
 
 	t.Run("getPontos Task com url de serviço errada", func(t *testing.T) {
-		scheduler, err := NewUrbsScheduler(s)
+		scheduler, err := NewUrbsScheduler(s, c)
 		if err != nil {
 			t.Fatalf("Erro ao criar scheduler: %q", err)
 		}
@@ -144,7 +147,7 @@ func TestGetPontos(t *testing.T) {
 	})
 
 	t.Run("getPontosLinhas", func(t *testing.T) {
-		scheduler, err := NewUrbsScheduler(s)
+		scheduler, err := NewUrbsScheduler(s, c)
 		if err != nil {
 			t.Fatalf("Erro ao criar scheduler: %q", err)
 		}
@@ -168,8 +171,9 @@ func TestGetPontos(t *testing.T) {
 
 func TestGetTabelaLinha(t *testing.T) {
 	s := createStore(t)
+	c := config.EnvConfigurer{}
 	t.Run("GetTabelaLinha", func(t *testing.T) {
-		scheduler, err := NewUrbsScheduler(s)
+		scheduler, err := NewUrbsScheduler(s, c)
 		if err != nil {
 			t.Fatalf("Erro ao criar scheduler: %q", err)
 		}
@@ -199,7 +203,10 @@ func TestGetTabelaLinha(t *testing.T) {
 	})
 
 	t.Run("GetTabelaLinha com url errada", func(t *testing.T) {
-		scheduler, err := NewUrbsScheduler(s)
+		mc := mock.ConfigToMock(c)
+
+		scheduler, err := NewUrbsScheduler(s, mc)
+		scheduler.serviceURL = ""
 		if err != nil {
 			t.Fatalf("Erro ao criar scheduler: %q", err)
 		}
@@ -231,7 +238,7 @@ func TestGetTabelaLinha(t *testing.T) {
 	})
 
 	t.Run("getTabelaLinhas", func(t *testing.T) {
-		scheduler, err := NewUrbsScheduler(s)
+		scheduler, err := NewUrbsScheduler(s, c)
 		if err != nil {
 			t.Fatalf("Erro ao criar scheduler: %q", err)
 		}
@@ -248,13 +255,13 @@ func TestGetTabelaLinha(t *testing.T) {
 }
 
 func TestVeiculos(t *testing.T) {
-
+	c := config.EnvConfigurer{}
 	t.Run("GetVeiculos caminho feliz", func(t *testing.T) {
 		s := createStore(t)
-		server := test.NewMockServer(test.GetVeiculosHandler)
+		server := mock.NewMockServer(mock.GetVeiculosHandler)
 		defer server.Close()
 
-		scheduler, err := NewUrbsScheduler(s)
+		scheduler, err := NewUrbsScheduler(s, c)
 		if err != nil {
 			t.Fatalf("Erro ao criar scheduler: %v", err)
 		}
@@ -271,7 +278,7 @@ func TestVeiculos(t *testing.T) {
 
 	t.Run("GetVeiculos resposta errada", func(t *testing.T) {
 		s := createStore(t)
-		server := test.NewMockServer(test.GetVeiculosWrongBodyHandler)
+		server := mock.NewMockServer(mock.GetVeiculosWrongBodyHandler)
 		defer server.Close()
 
 		var buf bytes.Buffer
@@ -280,7 +287,7 @@ func TestVeiculos(t *testing.T) {
 			log.SetOutput(os.Stderr)
 		}()
 
-		scheduler, err := NewUrbsScheduler(s)
+		scheduler, err := NewUrbsScheduler(s, c)
 		if err != nil {
 			t.Fatalf("Erro ao criar scheduler: %v", err)
 		}
@@ -301,7 +308,7 @@ func TestVeiculos(t *testing.T) {
 
 	t.Run("GetVeiculos status 500", func(t *testing.T) {
 		s := createStore(t)
-		server := test.NewMockServer(test.GetVeiculosStatus500Handler)
+		server := mock.NewMockServer(mock.GetVeiculosStatus500Handler)
 		defer server.Close()
 
 		var buf bytes.Buffer
@@ -310,7 +317,7 @@ func TestVeiculos(t *testing.T) {
 			log.SetOutput(os.Stderr)
 		}()
 
-		scheduler, err := NewUrbsScheduler(s)
+		scheduler, err := NewUrbsScheduler(s, c)
 		if err != nil {
 			t.Fatalf("Erro ao criar scheduler: %v", err)
 		}
@@ -338,7 +345,7 @@ func createStore(t *testing.T) store.Storer {
 	// 	t.Fatalf("Erro ao criar client mongo: %v", err)
 	// }
 	// return store.NewMongoStore(ctx, client)
-	return &test.MockStore{}
+	return &mock.MockStore{}
 }
 
 func AssertNumberOfDocuments(ctx context.Context, t *testing.T, coll *mongo.Collection, want int64) {

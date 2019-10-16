@@ -2,9 +2,8 @@ package store
 
 import (
 	"context"
-	"os"
 	"time"
-
+	"github.com/luizvnasc/cwbus-hist/config"
 	"github.com/luizvnasc/cwbus-hist/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -18,8 +17,8 @@ type MongoStore struct {
 }
 
 // NewMongoStore cria uma Store para uma base de dados mongodb.
-func NewMongoStore(ctx context.Context, client *mongo.Client) (store Storer) {
-	store = &MongoStore{client: client, db: client.Database(os.Getenv("CWBUS_DB_HIST"))}
+func NewMongoStore(ctx context.Context, client *mongo.Client, config config.Configurer) (store Storer) {
+	store = &MongoStore{client: client, db: client.Database(config.DBName())}
 	return
 }
 
