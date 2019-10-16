@@ -14,7 +14,7 @@ import (
 	"github.com/luizvnasc/cwbus-hist/db"
 	"github.com/luizvnasc/cwbus-hist/model"
 	"github.com/luizvnasc/cwbus-hist/store"
-	"github.com/luizvnasc/cwbus-hist/test"
+	"github.com/luizvnasc/cwbus-hist/test/mock"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -35,7 +35,7 @@ func TestUrbsScheduler(t *testing.T) {
 		}
 	})
 	t.Run("Criar Urbs Scheduler sem informar sem código urbs", func(t *testing.T) {
-		mc := test.ConfigToMock(c)
+		mc := mock.ConfigToMock(c)
 		mc.SetUrbsCode("")
 		_, err := NewUrbsScheduler(s, mc)
 
@@ -45,7 +45,7 @@ func TestUrbsScheduler(t *testing.T) {
 
 	})
 	t.Run("Criar Urbs Scheduler sem informar sem url de serviços da urbs", func(t *testing.T) {
-		mc := test.ConfigToMock(c)
+		mc := mock.ConfigToMock(c)
 		mc.SetServiceURL("")
 		_, err := NewUrbsScheduler(s, mc)
 
@@ -68,7 +68,6 @@ func TestGetLinhas(t *testing.T) {
 			t.Fatalf("Erro ao criar scheduler: %q", err)
 		}
 		scheduler.getLinhas()
-		t.Logf("dbname: %q", c.DBName())
 		linhas := client.Database(c.DBName()).Collection("linhas")
 		AssertNumberOfDocuments(ctx, t, linhas, 311)
 	})
@@ -204,7 +203,7 @@ func TestGetTabelaLinha(t *testing.T) {
 	})
 
 	t.Run("GetTabelaLinha com url errada", func(t *testing.T) {
-		mc := test.ConfigToMock(c)
+		mc := mock.ConfigToMock(c)
 
 		scheduler, err := NewUrbsScheduler(s, mc)
 		scheduler.serviceURL = ""
@@ -259,7 +258,7 @@ func TestVeiculos(t *testing.T) {
 	c := config.EnvConfigurer{}
 	t.Run("GetVeiculos caminho feliz", func(t *testing.T) {
 		s := createStore(t)
-		server := test.NewMockServer(test.GetVeiculosHandler)
+		server := mock.NewMockServer(mock.GetVeiculosHandler)
 		defer server.Close()
 
 		scheduler, err := NewUrbsScheduler(s, c)
@@ -279,7 +278,7 @@ func TestVeiculos(t *testing.T) {
 
 	t.Run("GetVeiculos resposta errada", func(t *testing.T) {
 		s := createStore(t)
-		server := test.NewMockServer(test.GetVeiculosWrongBodyHandler)
+		server := mock.NewMockServer(mock.GetVeiculosWrongBodyHandler)
 		defer server.Close()
 
 		var buf bytes.Buffer
@@ -309,7 +308,7 @@ func TestVeiculos(t *testing.T) {
 
 	t.Run("GetVeiculos status 500", func(t *testing.T) {
 		s := createStore(t)
-		server := test.NewMockServer(test.GetVeiculosStatus500Handler)
+		server := mock.NewMockServer(mock.GetVeiculosStatus500Handler)
 		defer server.Close()
 
 		var buf bytes.Buffer
@@ -346,7 +345,7 @@ func createStore(t *testing.T) store.Storer {
 	// 	t.Fatalf("Erro ao criar client mongo: %v", err)
 	// }
 	// return store.NewMongoStore(ctx, client)
-	return &test.MockStore{}
+	return &mock.MockStore{}
 }
 
 func AssertNumberOfDocuments(ctx context.Context, t *testing.T, coll *mongo.Collection, want int64) {

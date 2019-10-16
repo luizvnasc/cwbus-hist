@@ -1,4 +1,4 @@
-package test
+package mock
 
 import (
 	"io/ioutil"
@@ -15,7 +15,7 @@ func NewMockServer(handler func(w http.ResponseWriter, r *http.Request)) *httpte
 
 // GetVeiculosHandler simula a o serviço getVeiculos da urbs
 func GetVeiculosHandler(w http.ResponseWriter, r *http.Request) {
-	path, _ := filepath.Abs("../test/getVeiculos.json")
+	path, _ := filepath.Abs("../test/mock/getVeiculos.json")
 	file, err := os.Open(path)
 	if err != nil {
 		log.Fatal(err)

@@ -11,12 +11,12 @@ import (
 	"testing"
 
 	"github.com/luizvnasc/cwbus-hist/config"
-	"github.com/luizvnasc/cwbus-hist/test"
+	"github.com/luizvnasc/cwbus-hist/test/mock"
 )
 
 func TestAppScheduler(t *testing.T) {
 	config := &config.EnvConfigurer{}
-	mockConfig := &test.MockConfigurer{}
+	mockConfig := &mock.MockConfigurer{}
 	t.Run("Cria um scheduler da aplicação", func(t *testing.T) {
 		s := NewAppScheduler(config)
 		if s == nil {
