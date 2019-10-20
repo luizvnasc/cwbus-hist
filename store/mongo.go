@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"time"
+
 	"github.com/luizvnasc/cwbus-hist/config"
 	"github.com/luizvnasc/cwbus-hist/model"
 	"go.mongodb.org/mongo-driver/bson"
@@ -99,9 +100,10 @@ func (ms *MongoStore) SaveVeiculos(veiculos map[string]model.Veiculo) error {
 	coll := ms.db.Collection("veiculos")
 
 	// Limpa a base para a adicionar as novas situações dos veículos.
-	coll.DeleteMany(ms.ctx, bson.M{})
+	//coll.DeleteMany(ms.ctx, bson.M{})
 
 	for _, veiculo := range veiculos {
+		veiculo.CriadoEm = time.Now().UTC()
 		operation := mongo.NewInsertOneModel()
 		operation.SetDocument(veiculo)
 		operations = append(operations, operation)
