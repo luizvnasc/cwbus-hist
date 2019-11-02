@@ -81,7 +81,7 @@ func TestVeiculos(t *testing.T) {
 			t.Errorf("Erro ao obter os veiculos cadastradas: %q", err)
 		}
 		count := 0;
-		for _, v := veiculos {
+		for _, v := range veiculos {
 			if v.Codigo == "GC295" {
 				count++
 			}
