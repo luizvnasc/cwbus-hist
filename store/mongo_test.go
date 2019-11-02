@@ -64,7 +64,7 @@ func TestVeiculos(t *testing.T) {
 			Situacao2:   "TIPO INCOMPATIVEL",
 			Sent:        "VOLTA",
 			Tcount:      1,
-			//Sentido:     "198-BAIRRO NOVO MUNDO (15:38)",
+			CriadoEm:    time.Now(),
 		},
 	}
 
@@ -80,8 +80,14 @@ func TestVeiculos(t *testing.T) {
 		if err != nil {
 			t.Errorf("Erro ao obter os veiculos cadastradas: %q", err)
 		}
-		if len(veiculos) != 1 {
-			t.Errorf("Erro ao contar Veiculos. Esperava-se %d veiculos, obteve-se %d", 1, len(veiculos))
+		count := 0;
+		for _, v := range veiculos {
+			if v.Codigo == "GC295" {
+				count++
+			}
+		}
+		if count > 3 {
+			t.Errorf("Erro ao contar Veiculos. Esperava-se no máximo %d veiculos, obteve-se %d", 3, len(veiculos))
 		}
 	})
 }
